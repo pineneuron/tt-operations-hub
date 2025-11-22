@@ -1,5 +1,5 @@
 import { NavItem } from '@/types';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/types/user-role';
 
 export type Product = {
   photo_url: string;

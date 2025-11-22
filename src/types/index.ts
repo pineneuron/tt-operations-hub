@@ -1,5 +1,5 @@
 import { Icons } from '@/components/icons';
-import { UserRole } from '@prisma/client';
+import { UserRole } from './user-role';
 
 export interface NavItem {
   title: string;
