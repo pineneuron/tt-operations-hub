@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Card,
   CardHeader,
@@ -6,42 +5,38 @@ import {
   CardTitle,
   CardDescription
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-const salesData = [
+const jobData = [
   {
-    name: 'Olivia Martin',
-    email: 'olivia.martin@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/1.png',
-    fallback: 'OM',
-    amount: '+$1,999.00'
+    title: 'Main stage lighting rig',
+    assignedTo: 'Staff • Events',
+    due: 'Due today',
+    status: 'In progress'
   },
   {
-    name: 'Jackson Lee',
-    email: 'jackson.lee@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/2.png',
-    fallback: 'JL',
-    amount: '+$39.00'
+    title: 'Vendor contract (Audio Visual Nepal)',
+    assignedTo: 'Admin • Vendor/Supplier',
+    due: 'Due tomorrow',
+    status: 'Waiting approval'
   },
   {
-    name: 'Isabella Nguyen',
-    email: 'isabella.nguyen@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/3.png',
-    fallback: 'IN',
-    amount: '+$299.00'
+    title: 'Client walk-through - Masta Foods',
+    assignedTo: 'Meeting • Client',
+    due: 'Thu, 2:00 PM',
+    status: 'Confirmed'
   },
   {
-    name: 'William Kim',
-    email: 'will@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/4.png',
-    fallback: 'WK',
-    amount: '+$99.00'
+    title: 'Transport manifest for Expo',
+    assignedTo: 'Transportation • Staff',
+    due: 'Fri, 9:00 AM',
+    status: 'Dispatch ready'
   },
   {
-    name: 'Sofia Davis',
-    email: 'sofia.davis@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/5.png',
-    fallback: 'SD',
-    amount: '+$39.00'
+    title: 'Finance clearance - Vendor payouts',
+    assignedTo: 'Finance • Platform Admin',
+    due: 'Fri, 6:00 PM',
+    status: 'Action required'
   }
 ];
 
@@ -49,25 +44,26 @@ export function RecentSales() {
   return (
     <Card className='h-full'>
       <CardHeader>
-        <CardTitle>Recent Sales</CardTitle>
-        <CardDescription>You made 265 sales this month.</CardDescription>
+        <CardTitle>Job & Task Queue</CardTitle>
+        <CardDescription>
+          Admin can push tasks to Staff and Vendors. Updates notify everyone.
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className='space-y-8'>
-          {salesData.map((sale, index) => (
-            <div key={index} className='flex items-center'>
-              <Avatar className='h-9 w-9'>
-                <AvatarImage src={sale.avatar} alt='Avatar' />
-                <AvatarFallback>{sale.fallback}</AvatarFallback>
-              </Avatar>
-              <div className='ml-4 space-y-1'>
-                <p className='text-sm leading-none font-medium'>{sale.name}</p>
-                <p className='text-muted-foreground text-sm'>{sale.email}</p>
-              </div>
-              <div className='ml-auto font-medium'>{sale.amount}</div>
+      <CardContent className='space-y-4'>
+        {jobData.map((job) => (
+          <div key={job.title} className='rounded-lg border p-4'>
+            <div className='flex items-center justify-between gap-2'>
+              <p className='text-sm leading-tight font-semibold'>{job.title}</p>
+              <Badge variant='secondary' className='text-xs'>
+                {job.status}
+              </Badge>
             </div>
-          ))}
-        </div>
+            <p className='text-muted-foreground mt-2 text-xs'>
+              {job.assignedTo}
+            </p>
+            <p className='mt-1 text-sm font-medium'>{job.due}</p>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

@@ -17,8 +17,8 @@ const META_THEME_COLORS = {
 };
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'Tech Trust Operations Hub',
+  description: 'Tech Trust Operations Hub'
 };
 
 export const viewport: Viewport = {
@@ -79,25 +79,32 @@ export default function RootLayout({
           }}
         />
       </head>
-      <Suspense fallback={
-        <body className={cn('bg-background overflow-hidden overscroll-none font-sans antialiased', fontVariables)}>
-          <NextTopLoader color='var(--primary)' showSpinner={false} />
-          <NuqsAdapter>
-            <ThemeProvider
-              attribute='class'
-              defaultTheme='system'
-              enableSystem
-              disableTransitionOnChange
-              enableColorScheme
-            >
-              <Providers activeThemeValue=''>
-                <Toaster />
-                {children}
-              </Providers>
-            </ThemeProvider>
-          </NuqsAdapter>
-        </body>
-      }>
+      <Suspense
+        fallback={
+          <body
+            className={cn(
+              'bg-background overflow-hidden overscroll-none font-sans antialiased',
+              fontVariables
+            )}
+          >
+            <NextTopLoader color='var(--primary)' showSpinner={false} />
+            <NuqsAdapter>
+              <ThemeProvider
+                attribute='class'
+                defaultTheme='system'
+                enableSystem
+                disableTransitionOnChange
+                enableColorScheme
+              >
+                <Providers activeThemeValue=''>
+                  <Toaster />
+                  {children}
+                </Providers>
+              </ThemeProvider>
+            </NuqsAdapter>
+          </body>
+        }
+      >
         <ThemeWrapper>{children}</ThemeWrapper>
       </Suspense>
     </html>

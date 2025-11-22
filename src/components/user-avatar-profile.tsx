@@ -4,9 +4,9 @@ interface UserAvatarProfileProps {
   className?: string;
   showInfo?: boolean;
   user: {
-    imageUrl?: string;
-    fullName?: string | null;
-    emailAddresses: Array<{ emailAddress: string }>;
+    image?: string | null;
+    name?: string | null;
+    email?: string | null;
   } | null;
 }
 
@@ -15,21 +15,22 @@ export function UserAvatarProfile({
   showInfo = false,
   user
 }: UserAvatarProfileProps) {
+  const initials =
+    user?.name?.slice(0, 2)?.toUpperCase() ||
+    user?.email?.slice(0, 2)?.toUpperCase() ||
+    'CN';
+
   return (
     <div className='flex items-center gap-2'>
       <Avatar className={className}>
-        <AvatarImage src={user?.imageUrl || ''} alt={user?.fullName || ''} />
-        <AvatarFallback className='rounded-lg'>
-          {user?.fullName?.slice(0, 2)?.toUpperCase() || 'CN'}
-        </AvatarFallback>
+        <AvatarImage src={user?.image || ''} alt={user?.name || ''} />
+        <AvatarFallback className='rounded-lg'>{initials}</AvatarFallback>
       </Avatar>
 
       {showInfo && (
         <div className='grid flex-1 text-left text-sm leading-tight'>
-          <span className='truncate font-semibold'>{user?.fullName || ''}</span>
-          <span className='truncate text-xs'>
-            {user?.emailAddresses[0].emailAddress || ''}
-          </span>
+          <span className='truncate font-semibold'>{user?.name || ''}</span>
+          <span className='truncate text-xs'>{user?.email || ''}</span>
         </div>
       )}
     </div>

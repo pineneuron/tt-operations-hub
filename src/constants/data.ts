@@ -1,4 +1,5 @@
 import { NavItem } from '@/types';
+import { UserRole } from '@prisma/client';
 
 export type Product = {
   photo_url: string;
@@ -11,52 +12,195 @@ export type Product = {
   updated_at: string;
 };
 
+// Helper function to check if a menu item should be visible for a role
+export function isMenuItemVisible(item: NavItem, userRole?: string): boolean {
+  if (!item.roles || item.roles.length === 0) {
+    return true; // If no roles specified, show to everyone
+  }
+  if (!userRole) {
+    return false;
+  }
+  return item.roles.includes(userRole as UserRole);
+}
+
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
 export const navItems: NavItem[] = [
   {
-    title: 'Dashboard',
-    url: '/dashboard/overview',
+    title: 'Home',
+    url: '/dashboard',
     icon: 'dashboard',
     isActive: false,
-    shortcut: ['d', 'd'],
-    items: [] // Empty array as there are no child items for Dashboard
+    shortcut: ['h', 'h'],
+    items: [],
+    roles: [] // Available to all roles
   },
   {
-    title: 'Product',
-    url: '/dashboard/product',
-    icon: 'product',
-    shortcut: ['p', 'p'],
+    title: 'Attendance',
+    url: '/dashboard/attendance',
+    icon: 'attendance',
     isActive: false,
-    items: [] // No child items
-  },
-  {
-    title: 'Account',
-    url: '#', // Placeholder as there is no direct link for the parent
-    icon: 'billing',
-    isActive: true,
-
+    shortcut: ['a', 'a'],
+    roles: [UserRole.STAFF, UserRole.PLATFORM_ADMIN, UserRole.ADMIN],
     items: [
       {
-        title: 'Profile',
-        url: '/dashboard/profile',
-        icon: 'userPen',
-        shortcut: ['m', 'm']
+        title: 'Check-In',
+        url: '/dashboard/attendance/check-in',
+        icon: 'checkIn',
+        roles: [UserRole.STAFF]
       },
       {
-        title: 'Login',
-        shortcut: ['l', 'l'],
-        url: '/',
-        icon: 'login'
+        title: 'Check-Out',
+        url: '/dashboard/attendance/check-out',
+        icon: 'checkOut',
+        roles: [UserRole.STAFF]
+      },
+      {
+        title: 'Attendance History',
+        url: '/dashboard/attendance/history',
+        icon: 'history',
+        roles: [UserRole.STAFF, UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
       }
     ]
   },
   {
-    title: 'Kanban',
-    url: '/dashboard/kanban',
-    icon: 'kanban',
-    shortcut: ['k', 'k'],
+    title: 'Events',
+    url: '/dashboard/events',
+    icon: 'events',
     isActive: false,
-    items: [] // No child items
+    shortcut: ['e', 'e'],
+    roles: [], // Available to all roles
+    items: [
+      {
+        title: 'Upcoming Events',
+        url: '/dashboard/events/upcoming',
+        icon: 'upcoming',
+        roles: []
+      },
+      {
+        title: 'Past Events',
+        url: '/dashboard/events/past',
+        icon: 'past',
+        roles: []
+      },
+      {
+        title: 'Event Updates',
+        url: '/dashboard/events/updates',
+        icon: 'updates',
+        roles: []
+      },
+      {
+        title: 'Event Reports',
+        url: '/dashboard/events/reports',
+        icon: 'reports',
+        roles: [
+          UserRole.STAFF,
+          UserRole.PLATFORM_ADMIN,
+          UserRole.ADMIN,
+          UserRole.FINANCE
+        ]
+      },
+      {
+        title: 'Summary',
+        url: '/dashboard/events/summary',
+        icon: 'summary',
+        roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
+      }
+    ]
+  },
+  {
+    title: 'Meeting',
+    url: '/dashboard/meeting',
+    icon: 'meeting',
+    isActive: false,
+    shortcut: ['m', 'm'],
+    roles: [], // Available to all roles
+    items: [
+      {
+        title: 'Upcoming Meeting',
+        url: '/dashboard/meeting/upcoming',
+        icon: 'upcoming',
+        roles: []
+      },
+      {
+        title: 'Past Meeting',
+        url: '/dashboard/meeting/past',
+        icon: 'past',
+        roles: []
+      },
+      {
+        title: 'Summary',
+        url: '/dashboard/meeting/summary',
+        icon: 'summary',
+        roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
+      }
+    ]
+  },
+  {
+    title: 'To Do List',
+    url: '/dashboard/todo',
+    icon: 'todo',
+    isActive: false,
+    shortcut: ['t', 't'],
+    roles: [
+      UserRole.STAFF,
+      UserRole.VENDOR_SUPPLIER,
+      UserRole.PLATFORM_ADMIN,
+      UserRole.ADMIN
+    ],
+    items: [
+      {
+        title: 'Job List Details',
+        url: '/dashboard/todo/jobs',
+        icon: 'todo',
+        roles: [
+          UserRole.STAFF,
+          UserRole.VENDOR_SUPPLIER,
+          UserRole.PLATFORM_ADMIN,
+          UserRole.ADMIN
+        ]
+      }
+    ]
+  },
+  {
+    title: 'Transportation',
+    url: '/dashboard/transportation',
+    icon: 'transportation',
+    isActive: false,
+    shortcut: ['tr', 'tr'],
+    roles: [
+      UserRole.STAFF,
+      UserRole.VENDOR_SUPPLIER,
+      UserRole.PLATFORM_ADMIN,
+      UserRole.ADMIN
+    ],
+    items: [
+      {
+        title: 'Transportation Booking',
+        url: '/dashboard/transportation/booking',
+        icon: 'booking',
+        roles: [UserRole.STAFF, UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
+      },
+      {
+        title: 'Transportation Entry',
+        url: '/dashboard/transportation/entry',
+        icon: 'entry',
+        roles: [
+          UserRole.STAFF,
+          UserRole.VENDOR_SUPPLIER,
+          UserRole.PLATFORM_ADMIN,
+          UserRole.ADMIN
+        ]
+      }
+    ]
+  },
+  {
+    title: 'More',
+    url: '/dashboard/more',
+    icon: 'more',
+    isActive: false,
+    shortcut: ['mo', 'mo'],
+    items: [],
+    roles: [] // Available to all roles
   }
 ];
 

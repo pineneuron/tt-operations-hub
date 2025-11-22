@@ -1,4 +1,5 @@
 import { Icons } from '@/components/icons';
+import { UserRole } from '@prisma/client';
 
 export interface NavItem {
   title: string;
@@ -11,6 +12,7 @@ export interface NavItem {
   description?: string;
   isActive?: boolean;
   items?: NavItem[];
+  roles?: UserRole[]; // Roles that can access this menu item
 }
 
 export interface NavItemWithChildren extends NavItem {
