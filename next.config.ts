@@ -13,7 +13,10 @@ const baseConfig: NextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+  // Add empty turbopack config to silence webpack config warning
+  // Sentry uses webpack config, but Next.js 16 defaults to Turbopack
+  turbopack: {}
 };
 
 let configWithPlugins = baseConfig;
