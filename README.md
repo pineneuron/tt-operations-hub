@@ -1,126 +1,226 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/9113740/201498864-2a900c64-d88f-4ed4-b5cf-770bcb57e1f5.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/9113740/201498152-b171abb8-9225-487a-821c-6ff49ee48579.png">
-</picture>
+# TT Operations Hub
 
-<div align="center"><strong>Next.js Admin Dashboard Starter Template With Shadcn-ui</strong></div>
-<div align="center">Built with the Next.js 15 App Router</div>
+<div align="center"><strong>Operations Management System</strong></div>
+<div align="center">Built with Next.js 16 App Router</div>
 <br />
-<div align="center">
-<a href="https://dub.sh/shadcn-dashboard">View Demo</a>
-<span>
-</div>
 
 ## Overview
 
-This is a starter template using the following stack:
+TT Operations Hub is a comprehensive operations management system designed for Tech Trust, providing features for attendance tracking, event management, meetings, task management, and transportation coordination.
 
-- Framework - [Next.js 15](https://nextjs.org/13)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Auth - [Clerk](https://go.clerk.com/ILdYhn7)
-- Error tracking  [<picture><img alt="Sentry" src="public/assets/sentry.svg">
-        </picture>](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)
-- Styling - [Tailwind CSS v4](https://tailwindcss.com)
-- Components - [Shadcn-ui](https://ui.shadcn.com)
-- Schema Validations - [Zod](https://zod.dev)
-- State Management - [Zustand](https://zustand-demo.pmnd.rs)
-- Search params state manager - [Nuqs](https://nuqs.47ng.com/)
-- Tables - [Tanstack Data Tables](https://ui.shadcn.com/docs/components/data-table) • [Dice table](https://www.diceui.com/docs/components/data-table)
-- Forms - [React Hook Form](https://ui.shadcn.com/docs/components/form)
-- Command+k interface - [kbar](https://kbar.vercel.app/)
-- Linting - [ESLint](https://eslint.org)
-- Pre-commit Hooks - [Husky](https://typicode.github.io/husky/)
-- Formatting - [Prettier](https://prettier.io)
+## Tech Stack
 
-_If you are looking for a Tanstack start dashboard template, here is the [repo](https://git.new/tanstack-start-dashboard)._
+- **Framework** - [Next.js 16](https://nextjs.org)
+- **Language** - [TypeScript](https://www.typescriptlang.org)
+- **Authentication** - [NextAuth.js v5](https://authjs.dev)
+- **Database** - [PostgreSQL](https://www.postgresql.org) with [Prisma](https://www.prisma.io)
+- **Error Tracking** - [Sentry](https://sentry.io/for/nextjs/)
+- **Styling** - [Tailwind CSS v4](https://tailwindcss.com)
+- **Components** - [Shadcn-ui](https://ui.shadcn.com)
+- **Schema Validations** - [Zod](https://zod.dev)
+- **State Management** - [Zustand](https://zustand-demo.pmnd.rs)
+- **Search params state manager** - [Nuqs](https://nuqs.47ng.com/)
+- **Tables** - [Tanstack Data Tables](https://ui.shadcn.com/docs/components/data-table)
+- **Forms** - [React Hook Form](https://ui.shadcn.com/docs/components/form)
+- **Command+k interface** - [kbar](https://kbar.vercel.app/)
+- **Linting** - [ESLint](https://eslint.org)
+- **Pre-commit Hooks** - [Husky](https://typicode.github.io/husky/)
+- **Formatting** - [Prettier](https://prettier.io)
 
-## Pages
+## Features
 
-| Pages                                                                                 | Specifications                                                                                                                                                                                                                                                          |
-| :------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Signup / Signin](https://go.clerk.com/ILdYhn7)      | Authentication with **Clerk** provides secure authentication and user management with multiple login options including passwordless authentication, social logins, and enterprise SSO - all designed to enhance security while delivering a seamless user experience. |
-| [Dashboard (Overview)](https://shadcn-dashboard.kiranism.dev/dashboard)    | Cards with Recharts graphs for analytics. Parallel routes in the overview sections feature independent loading, error handling, and isolated component rendering. |
-| [Product](https://shadcn-dashboard.kiranism.dev/dashboard/product)         | Tanstack tables with server side searching, filter, pagination by Nuqs which is a Type-safe search params state manager in nextjs                                                                                                                                       |
-| [Product/new](https://shadcn-dashboard.kiranism.dev/dashboard/product/new) | A Product Form with shadcn form (react-hook-form + zod).                                                                                                                                                                                                                |
-| [Profile](https://shadcn-dashboard.kiranism.dev/dashboard/profile)         | Clerk's full-featured account management UI that allows users to manage their profile and security settings                                                                                                                                                             |
-| [Kanban Board](https://shadcn-dashboard.kiranism.dev/dashboard/kanban)     | A Drag n Drop task management board with dnd-kit and zustand to persist state locally.                                                                                                                                                                                  |
-| [Not Found](https://shadcn-dashboard.kiranism.dev/dashboard/notfound)      | Not Found Page Added in the root level                                                                                                                                                                                                                                  |
-| [Global Error](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)           | A centralized error page that captures and displays errors across the application. Integrated with **Sentry** to log errors, provide detailed reports, and enable replay functionality for better debugging. |
+### Authentication
+- Email/password authentication
+- OTP (One-Time Password) login
+- Password reset via OTP
+- Role-based access control
 
-## Feature based organization
+### User Roles
+- **Platform Admin** - Full system access and user management
+- **Admin** - Access to all areas for monitoring and management
+- **Finance** - Financial and transactional activity tracking
+- **Staff** - Attendance, events, meetings, tasks, and transportation
+- **Vendor/Supplier** - View assigned transactions and transportation bookings
+- **Client** - View own event details and information
+
+### Core Modules
+
+#### Dashboard
+- Overview with analytics and charts
+- Recent notifications
+- Summary cards (Attendance Compliance, Upcoming Events, Meetings Today)
+- Role-based dashboard customization
+
+#### Attendance
+- Location-based check-in/check-out
+- Attendance history
+- Working hours calculation
+- Admin attendance management
+
+#### Events
+- Upcoming and past events
+- Event updates and reports
+- Event status tracking
+- Client and venue management
+
+#### Meetings
+- Meeting scheduling and management
+- Meeting history
+- Participant management
+- Meeting summaries
+
+#### To Do List
+- Task creation and assignment
+- Task status tracking
+- Automatic notifications
+- Task completion tracking
+
+#### Transportation
+- Transportation booking
+- Vendor/Supplier assignment
+- Trip entry and tracking
+- Delivery status management
+
+#### Kanban Board
+- Drag and drop task management
+- Local state persistence
+- Task organization and prioritization
+
+## Project Structure
 
 ```plaintext
 src/
-├── app/ # Next.js App Router directory
-│ ├── (auth)/ # Auth route group
-│ │ ├── (signin)/
-│ ├── (dashboard)/ # Dashboard route group
-│ │ ├── layout.tsx
-│ │ ├── loading.tsx
-│ │ └── page.tsx
-│ └── api/ # API routes
+├── app/                    # Next.js App Router directory
+│   ├── api/                # API routes
+│   │   └── auth/           # Authentication endpoints
+│   ├── auth/               # Auth pages (login, forgot-password, reset-password)
+│   └── dashboard/          # Dashboard routes
+│       ├── overview/       # Dashboard overview with parallel routes
+│       ├── kanban/         # Kanban board
+│       ├── product/        # Product management
+│       └── profile/        # User profile
 │
-├── components/ # Shared components
-│ ├── ui/ # UI components (buttons, inputs, etc.)
-│ └── layout/ # Layout components (header, sidebar, etc.)
+├── components/             # Shared components
+│   ├── ui/                 # UI components (Shadcn)
+│   ├── layout/             # Layout components (header, sidebar, etc.)
+│   └── forms/              # Form components
 │
-├── features/ # Feature-based modules
-│ ├── feature/
-│ │ ├── components/ # Feature-specific components
-│ │ ├── actions/ # Server actions
-│ │ ├── schemas/ # Form validation schemas
-│ │ └── utils/ # Feature-specific utilities
-│ │
-├── lib/ # Core utilities and configurations
-│ ├── auth/ # Auth configuration
-│ ├── db/ # Database utilities
-│ └── utils/ # Shared utilities
+├── features/               # Feature-based modules
+│   ├── auth/               # Authentication components
+│   ├── kanban/             # Kanban board components
+│   ├── overview/           # Dashboard overview components
+│   ├── products/            # Product management
+│   └── profile/            # Profile management
 │
-├── hooks/ # Custom hooks
-│ └── use-debounce.ts
+├── lib/                    # Core utilities and configurations
+│   ├── auth.ts             # NextAuth configuration
+│   ├── auth-helpers.ts     # Auth utility functions
+│   ├── db.ts               # Prisma client
+│   ├── email.ts            # Email utilities (OTP, password reset)
+│   └── utils.ts            # Shared utilities
 │
-├── stores/ # Zustand stores
-│ └── dashboard-store.ts
+├── hooks/                  # Custom React hooks
 │
-└── types/ # TypeScript types
-└── index.ts
+└── types/                  # TypeScript type definitions
 ```
 
 ## Getting Started
 
-> [!NOTE]  
-> We are using **Next 15** with **React 19**, follow these steps:
+### Prerequisites
 
-Clone the repo:
+- Node.js 18+ 
+- pnpm (package manager)
+- PostgreSQL database
+- SMTP server for email functionality
 
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd tt-operations-hub
 ```
-git clone https://github.com/Kiranism/next-shadcn-dashboard-starter.git
+
+2. Install dependencies:
+```bash
+pnpm install
 ```
 
-- `pnpm install` ( we have legacy-peer-deps=true added in the .npmrc)
-- Create a `.env.local` file by copying the example environment file:
-  `cp env.example.txt .env.local`
-- Add the required environment variables to the `.env.local` file.
-- `pnpm run dev`
+3. Set up environment variables:
+```bash
+cp env.example.txt .env.local
+```
 
-##### Environment Configuration Setup
+4. Configure `.env.local` with your settings:
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `NEXTAUTH_SECRET` - Secret key for JWT encryption
+   - `NEXTAUTH_URL` - Base URL of your application
+   - `SMTP_*` - SMTP configuration for email
 
-To configure the environment for this project, refer to the `env.example.txt` file. This file contains the necessary environment variables required for authentication and error tracking.
+5. Set up the database:
+```bash
+# Generate Prisma Client
+npx prisma generate
 
-You should now be able to access the application at http://localhost:3000.
+# Push schema to database
+npx prisma db push
 
-> [!WARNING]
-> After cloning or forking the repository, be cautious when pulling or syncing with the latest changes, as this may result in breaking conflicts.
+# Seed the database with initial users
+pnpm db:seed
+```
 
-Cheers! 🥂
+6. Start the development server:
+```bash
+pnpm dev
+```
 
-## Star History
+The application will be available at http://localhost:3000
 
-<a href="https://www.star-history.com/#Kiranism/next-shadcn-dashboard-starter&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Kiranism/next-shadcn-dashboard-starter&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Kiranism/next-shadcn-dashboard-starter&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Kiranism/next-shadcn-dashboard-starter&type=date&legend=top-left" />
- </picture>
-</a>
+### Default Users
 
+After seeding, you can login with:
+- **Admin**: `admin@techtrust.com.np` / `password123`
+- **Admin**: `maheshbohara0101@gmail.com` / `password123`
+- **Staff**: `staff@techtrust.com.np` / `password123`
+- **Finance**: `finance@techtrust.com.np` / `password123`
+
+## Available Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+- `pnpm lint:fix` - Fix ESLint errors
+- `pnpm format` - Format code with Prettier
+- `pnpm db:seed` - Seed the database
+
+## Database Management
+
+### Prisma Commands
+
+```bash
+# Generate Prisma Client
+npx prisma generate
+
+# Push schema changes to database
+npx prisma db push
+
+# Open Prisma Studio (database GUI)
+npx prisma studio
+
+# Create a new migration
+npx prisma migrate dev --name migration_name
+```
+
+## Environment Variables
+
+See `env.example.txt` for all required environment variables. Key variables include:
+
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_SECRET` - Secret for JWT encryption (generate with: `openssl rand -base64 32`)
+- `NEXTAUTH_URL` - Application base URL
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` - Email configuration
+
+## License
+
+See [LICENSE](LICENSE) file for details.
