@@ -227,6 +227,24 @@ export async function POST(request: Request, props: RouteParams) {
           channel: 'IN_APP'
         }
       });
+
+      // Send FCM push notification to the employee
+      const { sendPushNotificationToUser } = await import(
+        '@/lib/notifications'
+      );
+      await sendPushNotificationToUser(
+        leaveRequest.userId,
+        {
+          title: notification.title,
+          body: notification.body || ''
+        },
+        {
+          notificationId: notification.id,
+          entityType: notification.entityType || 'LEAVE',
+          entityId: notification.entityId || '',
+          url: '/dashboard/leaves'
+        }
+      );
     }
 
     return NextResponse.json({ leaveRequest: updatedLeave });

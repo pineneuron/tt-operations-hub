@@ -157,6 +157,22 @@ export async function POST(request: Request) {
           channel: 'IN_APP'
         }))
       });
+
+      // Send FCM push notifications to admins
+      const { sendPushNotifications } = await import('@/lib/notifications');
+      await sendPushNotifications(
+        admins.map((admin) => admin.id),
+        {
+          title: notification.title,
+          body: notification.body || ''
+        },
+        {
+          notificationId: notification.id,
+          entityType: notification.entityType || 'ATTENDANCE',
+          entityId: notification.entityId || '',
+          url: '/dashboard/attendance/history'
+        }
+      );
     }
 
     return NextResponse.json({

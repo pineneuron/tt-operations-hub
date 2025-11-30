@@ -201,6 +201,22 @@ export async function POST(request: Request) {
           channel: 'IN_APP'
         }))
       });
+
+      // Send FCM push notifications to approvers
+      const { sendPushNotifications } = await import('@/lib/notifications');
+      await sendPushNotifications(
+        approvers.map((approver) => approver.id),
+        {
+          title: notification.title,
+          body: notification.body || ''
+        },
+        {
+          notificationId: notification.id,
+          entityType: notification.entityType || 'LEAVE',
+          entityId: notification.entityId || '',
+          url: '/dashboard/leaves'
+        }
+      );
     }
 
     return NextResponse.json({ leaveRequest }, { status: 201 });

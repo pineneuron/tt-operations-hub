@@ -3,6 +3,7 @@ import { SessionProvider } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import React from 'react';
 import { ActiveThemeProvider } from '../active-theme';
+import { FCMProvider } from './fcm-provider';
 
 export default function Providers({
   activeThemeValue,
@@ -15,7 +16,9 @@ export default function Providers({
 
   return (
     <ActiveThemeProvider initialTheme={activeThemeValue}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <FCMProvider>{children}</FCMProvider>
+      </SessionProvider>
     </ActiveThemeProvider>
   );
 }

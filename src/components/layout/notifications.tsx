@@ -87,7 +87,12 @@ export function Notifications() {
       const response = await fetch('/api/notifications');
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications || []);
+        const allNotifications = data.notifications || [];
+        const unreadNotifications = allNotifications
+          .filter((n: Notification) => !n.read)
+          .slice(0, 5);
+
+        setNotifications(unreadNotifications);
         setUnreadCount(data.unreadCount || 0);
       }
     } catch (error) {
@@ -104,11 +109,31 @@ export function Notifications() {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  const markAsRead = async (id: string) => {
-    // Optimistically update UI
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+  // Listen for FCM notifications
+  React.useEffect(() => {
+    const handleFCMNotification = (event: CustomEvent) => {
+      const payload = event.detail;
+      console.log('FCM notification received:', payload);
+
+      // Refresh notifications when FCM notification is received
+      fetchNotifications();
+    };
+
+    window.addEventListener(
+      'fcm-notification',
+      handleFCMNotification as EventListener
     );
+    return () => {
+      window.removeEventListener(
+        'fcm-notification',
+        handleFCMNotification as EventListener
+      );
+    };
+  }, [fetchNotifications]);
+
+  const markAsRead = async (id: string) => {
+    // Optimistically update UI - remove from list since we only show unread
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
     setUnreadCount((prev) => Math.max(0, prev - 1));
 
     try {
@@ -157,12 +182,12 @@ export function Notifications() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' size='icon' className='relative h-9 w-9'>
-          <IconBell className='h-6 w-6' />
+        <Button variant='ghost' className='relative h-10 w-10 p-0'>
+          <IconBell className='size-5 flex-shrink-0' />
           {unreadCount > 0 && (
             <Badge
               variant='destructive'
-              className='absolute top-0 right-0 flex h-4 w-4 items-center justify-center p-0 text-[11px]'
+              className='absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full p-0 text-[10px]'
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
@@ -185,7 +210,7 @@ export function Notifications() {
           )}
         </div>
         <DropdownMenuSeparator />
-        <ScrollArea>
+        <ScrollArea className='max-h-[400px]'>
           {loading ? (
             <div className='flex flex-col items-center justify-center py-8 text-center'>
               <div className='text-muted-foreground text-sm'>Loading...</div>
@@ -193,32 +218,22 @@ export function Notifications() {
           ) : notifications.length === 0 ? (
             <div className='flex flex-col items-center justify-center py-8 text-center'>
               <IconBell className='text-muted-foreground mb-2 h-12 w-12' />
-              <p className='text-muted-foreground text-sm'>No notifications</p>
+              <p className='text-muted-foreground text-sm'>
+                No unread notifications
+              </p>
             </div>
           ) : (
             <div className='py-1'>
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`hover:bg-accent cursor-pointer px-3 py-2 transition-colors ${
-                    !notification.read ? 'bg-accent/50' : ''
-                  }`}
+                  className='hover:bg-accent bg-accent/50 cursor-pointer px-3 py-2 transition-colors'
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className='flex items-start gap-3'>
-                    <div
-                      className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                        !notification.read ? 'bg-primary' : 'bg-transparent'
-                      }`}
-                    />
+                    <div className='bg-primary mt-1 h-2 w-2 shrink-0 rounded-full' />
                     <div className='min-w-0 flex-1 space-y-1'>
-                      <p
-                        className={`text-sm font-medium ${
-                          !notification.read
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'
-                        }`}
-                      >
+                      <p className='text-foreground text-sm font-medium'>
                         {notification.title}
                       </p>
                       {notification.message && (
@@ -236,12 +251,20 @@ export function Notifications() {
             </div>
           )}
         </ScrollArea>
-        {notifications.length > 0 && (
+        {unreadCount > 5 && (
           <>
             <DropdownMenuSeparator />
             <div className='p-2'>
-              <Button variant='ghost' className='w-full' size='sm'>
-                View all notifications
+              <Button
+                variant='ghost'
+                className='w-full'
+                size='sm'
+                onClick={() => {
+                  setOpen(false);
+                  router.push('/dashboard/notifications');
+                }}
+              >
+                View all {unreadCount} notifications
               </Button>
             </div>
           </>

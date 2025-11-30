@@ -16,7 +16,7 @@ import {
   IconHome,
   IconBuilding,
   IconPlayerPlay,
-  IconPlayerStop
+  IconLogout
 } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import { UserRole } from '@/types/user-role';
@@ -372,7 +372,7 @@ export function AttendanceWidget() {
                 size='sm'
                 disabled={loading}
               >
-                <IconPlayerStop className='h-4 w-4' />
+                <IconLogout className='h-4 w-4' />
                 Check Out
               </Button>
             </PopoverTrigger>
