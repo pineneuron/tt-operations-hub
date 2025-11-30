@@ -381,8 +381,8 @@ export default function OverViewLayout({
               <div>
                 <p className='font-semibold'>Check-Out</p>
                 <p className='text-muted-foreground'>
-                  System validates that a check-in exists and enforces the
-                  500-900 meter radius unless an Admin override is logged.
+                  System validates that a check-in exists and enforces the 500
+                  meter radius unless an Admin override is logged.
                 </p>
               </div>
               <div>

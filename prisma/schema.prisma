@@ -25,6 +25,103 @@ enum Permission {
   PERMISSION_MANAGE
 }
 
+enum EventStatus {
+  SCHEDULED
+  IN_PROGRESS
+  CANCELLED
+  COMPLETED
+}
+
+enum JobStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  COMPLETED
+}
+
+enum EventParticipantRole {
+  CLIENT
+  COORDINATOR
+  STAFF
+  VENDOR
+  SUPPLIER
+  GUEST
+}
+
+enum EventUpdateType {
+  STATUS
+  MILESTONE
+  ISSUE
+  NOTE
+}
+
+enum EventMediaType {
+  PHOTO
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+enum NotificationCategory {
+  EVENT
+  JOB
+  ATTENDANCE
+  MEETING
+  TRANSPORTATION
+  LEAVE
+  SYSTEM
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+}
+
+enum WorkLocation {
+  OFFICE
+  SITE
+}
+
+enum AttendanceStatus {
+  ON_TIME
+  LATE
+  ABSENT
+  HALF_DAY
+  AUTO_CHECKED_OUT
+}
+
+enum AttendanceFlag {
+  MISSING_LOCATION_CHECKS
+  LOCATION_OUT_OF_BOUNDS
+  AUTO_CHECKED_OUT
+  INCOMPLETE_SESSION
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  CASUAL
+  PERSONAL
+  EMERGENCY
+  UNPAID
+  MATERNITY
+  PATERNITY
+  COMPENSATORY
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum HalfDayType {
+  FIRST_HALF
+  SECOND_HALF
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -39,13 +136,198 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  otpTokens     OtpToken[]
-  passwordResetTokens PasswordResetToken[]
-  rolePermissions RolePermission[]
+  accounts             Account[]
+  sessions             Session[]
+  otpTokens            OtpToken[]
+  passwordResetTokens  PasswordResetToken[]
+  rolePermissions      RolePermission[]
+  eventsAsClient       Event[]               @relation("ClientEvents")
+  eventParticipants    EventParticipant[]
+  eventUpdates         EventUpdate[]
+  eventReports         EventReport[]
+  eventMediaUploads    EventMedia[]
+  jobAssignments       JobAssignment[]
+  jobsCreated          Job[]                 @relation("JobsCreated")
+  jobsUpdated          Job[]                 @relation("JobsUpdated")
+  notificationsCreated Notification[]        @relation("NotificationsCreated")
+  notificationReceipts NotificationReceipt[]
+  attendanceSessions   AttendanceSession[]
+  leaveRequests        LeaveRequest[]
+  leaveBalances        LeaveBalance[]
+  leaveApprovals       LeaveRequest[]        @relation("LeaveApprovals")
 
   @@map("users")
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  clientId    String
+  venue       String?
+  startDate   DateTime
+  endDate     DateTime
+  status      EventStatus @default(SCHEDULED)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  client       User               @relation("ClientEvents", fields: [clientId], references: [id], onDelete: Cascade)
+  jobs         Job[]
+  participants EventParticipant[]
+  updates      EventUpdate[]
+  reports      EventReport[]
+  media        EventMedia[]
+
+  @@index([clientId])
+  @@map("events")
+}
+
+model EventParticipant {
+  id        String               @id @default(cuid())
+  eventId   String
+  userId    String
+  role      EventParticipantRole
+  invitedBy String?
+  createdAt DateTime             @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@map("event_participants")
+}
+
+model EventUpdate {
+  id          String          @id @default(cuid())
+  eventId     String
+  createdById String
+  type        EventUpdateType @default(STATUS)
+  status      EventStatus?
+  message     String
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+
+  event     Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([createdById])
+  @@map("event_updates")
+}
+
+model EventReport {
+  id            String   @id @default(cuid())
+  eventId       String
+  submittedById String
+  summary       String
+  issues        String?
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  submittedBy User         @relation(fields: [submittedById], references: [id], onDelete: Cascade)
+  attachments EventMedia[] @relation("ReportMedia")
+
+  @@index([eventId])
+  @@index([submittedById])
+  @@map("event_reports")
+}
+
+model EventMedia {
+  id           String         @id @default(cuid())
+  eventId      String
+  reportId     String?
+  uploadedById String
+  type         EventMediaType @default(PHOTO)
+  url          String
+  description  String?
+  createdAt    DateTime       @default(now())
+
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  report     EventReport? @relation("ReportMedia", fields: [reportId], references: [id], onDelete: Cascade)
+  uploadedBy User         @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([uploadedById])
+  @@map("event_media")
+}
+
+model Notification {
+  id          String                @id @default(cuid())
+  category    NotificationCategory  @default(SYSTEM)
+  title       String
+  body        String?
+  entityType  NotificationCategory?
+  entityId    String?
+  data        Json?
+  createdById String?
+  createdAt   DateTime              @default(now())
+
+  createdBy User?                 @relation("NotificationsCreated", fields: [createdById], references: [id], onDelete: SetNull)
+  receipts  NotificationReceipt[]
+
+  @@index([category])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationReceipt {
+  id             String              @id @default(cuid())
+  notificationId String
+  userId         String
+  channel        NotificationChannel @default(IN_APP)
+  deliveredAt    DateTime?
+  seenAt         DateTime?
+  createdAt      DateTime            @default(now())
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId, channel])
+  @@index([userId, seenAt])
+  @@map("notification_receipts")
+}
+
+model Job {
+  id           String    @id @default(cuid())
+  title        String
+  remarks      String?
+  status       JobStatus @default(NOT_STARTED)
+  priority     Int?
+  assignedDate DateTime?
+  dueDate      DateTime?
+  completedAt  DateTime?
+  eventId      String?
+  createdById  String
+  updatedById  String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  event     Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  createdBy User            @relation("JobsCreated", fields: [createdById], references: [id])
+  updatedBy User            @relation("JobsUpdated", fields: [updatedById], references: [id])
+  assignees JobAssignment[]
+
+  @@index([eventId])
+  @@index([status])
+  @@index([assignedDate])
+  @@map("jobs")
+}
+
+model JobAssignment {
+  id         String   @id @default(cuid())
+  jobId      String
+  userId     String
+  role       String?
+  assignedAt DateTime @default(now())
+
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId])
+  @@index([userId])
+  @@map("job_assignments")
 }
 
 model Account {
@@ -125,4 +407,165 @@ model RolePermission {
 
   @@unique([userId, permission])
   @@map("role_permissions")
+}
+
+model AttendanceSession {
+  id           String           @id @default(cuid())
+  userId       String
+  date         DateTime // Date of attendance (date only)
+  workLocation WorkLocation // OFFICE or SITE
+  status       AttendanceStatus @default(ON_TIME)
+  flags        AttendanceFlag[] // Array of flags
+
+  // Check-in details
+  checkInTime            DateTime // When user checked in (UTC)
+  expectedCheckInTime    DateTime? // Expected check-in time (10 AM Kathmandu = 4:15 AM UTC)
+  isLate                 Boolean   @default(false)
+  lateMinutes            Int? // Minutes late (if late)
+  lateReason             String?   @db.Text // Required if late (textarea)
+  checkInLocationLat     Float? // Latitude at check-in
+  checkInLocationLng     Float? // Longitude at check-in
+  checkInLocationAddress String? // Address at check-in
+
+  // Check-out details
+  checkOutTime            DateTime? // When user checked out (UTC, nullable)
+  expectedCheckOutTime    DateTime? // Expected check-out time (6 PM Kathmandu = 12:15 PM UTC)
+  checkOutLocationLat     Float? // Latitude at check-out
+  checkOutLocationLng     Float? // Longitude at check-out
+  checkOutLocationAddress String? // Address at check-out
+
+  // Calculated fields
+  totalHours     Float? // Calculated hours worked
+  autoCheckedOut Boolean @default(false) // Whether auto-checked out at end of day
+
+  // Notes and remarks
+  checkInNotes  String? @db.Text // User notes at check-in
+  checkOutNotes String? @db.Text // User notes at check-out
+  managerNotes  String? @db.Text // Manager/admin notes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locationChecks AttendanceLocation[] // Location checks every 5 minutes
+
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+  @@index([userId, checkInTime])
+  @@index([status])
+  @@index([isLate])
+  @@map("attendance_sessions")
+}
+
+model AttendanceLocation {
+  id        String   @id @default(cuid())
+  sessionId String
+  timestamp DateTime // When location was recorded (UTC)
+  latitude  Float // Required - location must be shared
+  longitude Float // Required - location must be shared
+  address   String? // Optional reverse geocoded address
+  accuracy  Float? // GPS accuracy in meters
+  createdAt DateTime @default(now())
+
+  session AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([sessionId, timestamp])
+  @@index([timestamp])
+  @@map("attendance_locations")
+}
+
+model LeaveRequest {
+  id        String      @id @default(cuid())
+  userId    String // Employee requesting leave
+  leaveType LeaveType // Type of leave
+  status    LeaveStatus @default(PENDING)
+
+  // Date range
+  startDate   DateTime // Start date of leave
+  endDate     DateTime // End date of leave
+  isHalfDay   Boolean      @default(false) // Half day leave
+  halfDayType HalfDayType? // "FIRST_HALF" or "SECOND_HALF" if half day
+
+  // Details
+  reason String  @db.Text // Reason for leave
+  notes  String? @db.Text // Additional notes
+
+  // Approval workflow
+  approvedById    String? // Who approved/rejected (ADMIN, PLATFORM_ADMIN, or FINANCE)
+  approvedAt      DateTime? // When approved/rejected
+  rejectionReason String?   @db.Text // Reason if rejected
+
+  // Tracking
+  totalDays Float // Calculated total days (0.5 for half day, excluding weekends and holidays)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy  User?             @relation("LeaveApprovals", fields: [approvedById], references: [id], onDelete: SetNull)
+  attachments LeaveAttachment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@index([userId, startDate])
+  @@index([userId, status])
+  @@map("leave_requests")
+}
+
+model LeaveAttachment {
+  id             String   @id @default(cuid())
+  leaveRequestId String
+  fileName       String // Original file name
+  fileUrl        String // URL or path to the file
+  fileType       String? // MIME type
+  fileSize       Int? // File size in bytes
+  description    String? // Optional description
+  uploadedAt     DateTime @default(now())
+
+  leaveRequest LeaveRequest @relation(fields: [leaveRequestId], references: [id], onDelete: Cascade)
+
+  @@index([leaveRequestId])
+  @@map("leave_attachments")
+}
+
+model LeaveBalance {
+  id        String    @id @default(cuid())
+  userId    String
+  year      Int // Year (e.g., 2024, 2025)
+  leaveType LeaveType
+
+  // Balance tracking
+  totalAllocated Float @default(0) // Total days allocated for the year
+  totalUsed      Float @default(0) // Total days used (approved leaves)
+  totalPending   Float @default(0) // Total days in pending requests
+  balance        Float // Calculated: totalAllocated - totalUsed - totalPending
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year, leaveType])
+  @@index([userId, year])
+  @@map("leave_balances")
+}
+
+model NepaliHoliday {
+  id          String   @id @default(cuid())
+  category    String // Category/name of holiday (e.g., "Shivratri", "Dashain", "Tihar")
+  nameNepali  String? // Holiday name in Nepali
+  date        DateTime // Date of holiday (date only)
+  year        Int // Year for indexing
+  isRecurring Boolean  @default(false) // If true, applies every year
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([category, date, year])
+  @@index([date])
+  @@index([year])
+  @@index([category, year])
+  @@map("nepali_holidays")
 }

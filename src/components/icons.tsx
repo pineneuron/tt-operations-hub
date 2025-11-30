@@ -44,7 +44,9 @@ import {
   IconList,
   IconBook,
   IconMapPin,
-  IconBell
+  IconBell,
+  IconCalendarStar,
+  IconCalendarOff
 } from '@tabler/icons-react';
 
 export type Icon = React.ComponentType<IconProps>;
@@ -96,5 +98,7 @@ export const Icons = {
   reports: IconReport,
   summary: IconList,
   booking: IconBook,
-  entry: IconMapPin
+  entry: IconMapPin,
+  holidays: IconCalendarStar,
+  leaves: IconCalendarOff
 };

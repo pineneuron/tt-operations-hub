@@ -6,6 +6,7 @@ import * as React from 'react';
 import { DataTableDateFilter } from '@/components/ui/table/data-table-date-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { DataTableSliderFilter } from '@/components/ui/table/data-table-slider-filter';
+import { DataTableAutocompleteFilter } from '@/components/ui/table/data-table-autocomplete-filter';
 import { DataTableViewOptions } from '@/components/ui/table/data-table-view-options';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -136,6 +137,15 @@ function DataTableToolbarFilter<TData>({
               title={columnMeta.label ?? column.id}
               options={columnMeta.options ?? []}
               multiple={columnMeta.variant === 'multiSelect'}
+            />
+          );
+
+        case 'autocomplete':
+          return (
+            <DataTableAutocompleteFilter
+              column={column}
+              placeholder={columnMeta.placeholder ?? columnMeta.label}
+              searchEndpoint={columnMeta.searchEndpoint}
             />
           );
 

@@ -43,22 +43,15 @@ export const navItems: NavItem[] = [
     roles: [UserRole.STAFF, UserRole.PLATFORM_ADMIN, UserRole.ADMIN],
     items: [
       {
-        title: 'Check-In',
-        url: '/dashboard/attendance/check-in',
-        icon: 'checkIn',
-        roles: [UserRole.STAFF]
-      },
-      {
-        title: 'Check-Out',
-        url: '/dashboard/attendance/check-out',
-        icon: 'checkOut',
-        roles: [UserRole.STAFF]
-      },
-      {
         title: 'Attendance History',
         url: '/dashboard/attendance/history',
         icon: 'history',
-        roles: [UserRole.STAFF, UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
+        roles: [
+          UserRole.STAFF,
+          UserRole.FINANCE,
+          UserRole.ADMIN,
+          UserRole.PLATFORM_ADMIN
+        ]
       }
     ]
   },
@@ -136,8 +129,8 @@ export const navItems: NavItem[] = [
     ]
   },
   {
-    title: 'To Do List',
-    url: '/dashboard/todo',
+    title: 'Jobs',
+    url: '/dashboard/jobs',
     icon: 'todo',
     isActive: false,
     shortcut: ['t', 't'],
@@ -149,9 +142,20 @@ export const navItems: NavItem[] = [
     ],
     items: [
       {
-        title: 'Job List Details',
-        url: '/dashboard/todo/jobs',
+        title: 'All Jobs',
+        url: '/dashboard/jobs',
         icon: 'todo',
+        roles: [
+          UserRole.STAFF,
+          UserRole.VENDOR_SUPPLIER,
+          UserRole.PLATFORM_ADMIN,
+          UserRole.ADMIN
+        ]
+      },
+      {
+        title: 'Add New',
+        url: '/dashboard/jobs/add',
+        icon: 'add',
         roles: [
           UserRole.STAFF,
           UserRole.VENDOR_SUPPLIER,
@@ -191,6 +195,47 @@ export const navItems: NavItem[] = [
           UserRole.ADMIN
         ]
       }
+    ]
+  },
+  {
+    title: 'Users',
+    url: '/dashboard/users',
+    icon: 'user',
+    isActive: false,
+    shortcut: ['u', 'u'],
+    items: [],
+    roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
+  },
+  {
+    title: 'Leaves',
+    url: '/dashboard/leaves',
+    icon: 'leaves',
+    isActive: false,
+    shortcut: ['l', 'l'],
+    items: [
+      {
+        title: 'Leave Requests',
+        url: '/dashboard/leaves',
+        icon: 'leaves',
+        roles: [
+          UserRole.STAFF,
+          UserRole.FINANCE,
+          UserRole.ADMIN,
+          UserRole.PLATFORM_ADMIN
+        ]
+      },
+      {
+        title: 'Public Holidays',
+        url: '/dashboard/leaves/public-holidays',
+        icon: 'holidays',
+        roles: [UserRole.ADMIN, UserRole.PLATFORM_ADMIN]
+      }
+    ],
+    roles: [
+      UserRole.STAFF,
+      UserRole.FINANCE,
+      UserRole.ADMIN,
+      UserRole.PLATFORM_ADMIN
     ]
   },
   {

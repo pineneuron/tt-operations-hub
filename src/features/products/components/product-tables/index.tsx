@@ -17,7 +17,7 @@ export function ProductTable<TData, TValue>({
   totalItems,
   columns
 }: ProductTableParams<TData, TValue>) {
-  const [pageSize] = useQueryState('perPage', parseAsInteger.withDefault(10));
+  const [pageSize] = useQueryState('perPage', parseAsInteger.withDefault(20));
 
   const pageCount = Math.ceil(totalItems / pageSize);
 

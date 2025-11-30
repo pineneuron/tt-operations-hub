@@ -55,7 +55,8 @@ function FormSelect<
           )}
           <Select
             onValueChange={field.onChange}
-            defaultValue={field.value}
+            value={field.value ? String(field.value) : undefined}
+            defaultValue={field.value ? String(field.value) : undefined}
             disabled={disabled}
           >
             <FormControl>
