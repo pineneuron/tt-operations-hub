@@ -161,16 +161,17 @@ model User {
 }
 
 model Event {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  clientId    String
-  venue       String?
-  startDate   DateTime
-  endDate     DateTime
-  status      EventStatus @default(SCHEDULED)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  title            String
+  description      String?
+  clientId         String
+  venue            String?
+  featuredImageUrl String?
+  startDate        DateTime
+  endDate          DateTime
+  status           EventStatus @default(SCHEDULED)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   client       User               @relation("ClientEvents", fields: [clientId], references: [id], onDelete: Cascade)
   jobs         Job[]
@@ -209,8 +210,9 @@ model EventUpdate {
   metadata    Json?
   createdAt   DateTime        @default(now())
 
-  event     Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  createdBy User  @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  event     Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdBy User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  media     EventMedia[] @relation("UpdateMedia")
 
   @@index([eventId])
   @@index([createdById])
@@ -238,18 +240,22 @@ model EventReport {
 model EventMedia {
   id           String         @id @default(cuid())
   eventId      String
+  updateId     String? // Link to EventUpdate (for updates with images)
   reportId     String?
   uploadedById String
   type         EventMediaType @default(PHOTO)
   url          String
   description  String?
+  size         Int?
   createdAt    DateTime       @default(now())
 
   event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  update     EventUpdate? @relation("UpdateMedia", fields: [updateId], references: [id], onDelete: Cascade)
   report     EventReport? @relation("ReportMedia", fields: [reportId], references: [id], onDelete: Cascade)
   uploadedBy User         @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+  @@index([updateId])
   @@index([uploadedById])
   @@map("event_media")
 }
@@ -575,8 +581,8 @@ model FcmToken {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique // FCM registration token
-  deviceId  String?  // Optional device identifier
-  userAgent String?  // Browser/device user agent
+  deviceId  String? // Optional device identifier
+  userAgent String? // Browser/device user agent
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

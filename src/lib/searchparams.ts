@@ -19,7 +19,10 @@ export const searchParams = {
   dateTo: parseAsString,
   year: parseAsString,
   isRecurring: parseAsString,
-  workLocation: parseAsString
+  workLocation: parseAsString,
+  search: parseAsString,
+  clientId: parseAsString,
+  type: parseAsString // upcoming | past
   // advanced filter
   // filters: getFiltersStateParser().withDefault([]),
   // joinOperator: parseAsStringEnum(['and', 'or']).withDefault('and')

@@ -10,7 +10,25 @@ const baseConfig: NextConfig = {
         protocol: 'https',
         hostname: 'api.slingacademy.com',
         port: ''
+      },
+      // Cloudflare R2 domains
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+        port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: '*.r2.cloudflarestorage.com',
+        port: ''
       }
+      // Note: If using a custom domain for R2, add it here
+      // Example:
+      // {
+      //   protocol: 'https',
+      //   hostname: 'cdn.yourdomain.com',
+      //   port: ''
+      // }
     ]
   },
   transpilePackages: ['geist'],

@@ -1,6 +1,6 @@
 'use client';
 
-import { IconX, IconUpload } from '@tabler/icons-react';
+import { IconX, IconUpload, IconFileText } from '@tabler/icons-react';
 import Image from 'next/image';
 import * as React from 'react';
 import Dropzone, {
@@ -270,10 +270,13 @@ interface FileCardProps {
 }
 
 function FileCard({ file, progress, onRemove }: FileCardProps) {
+  const isDocument = isDocumentFile(file);
+  const isImage = isFileWithPreview(file);
+
   return (
     <div className='relative flex items-center space-x-4'>
       <div className='flex flex-1 space-x-4'>
-        {isFileWithPreview(file) ? (
+        {isImage ? (
           <Image
             src={file.preview}
             alt={file.name}
@@ -282,6 +285,10 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
             loading='lazy'
             className='aspect-square shrink-0 rounded-md object-cover'
           />
+        ) : isDocument ? (
+          <div className='border-border bg-muted/50 flex size-12 shrink-0 items-center justify-center rounded-md border'>
+            <IconFileText className='text-muted-foreground size-6' />
+          </div>
         ) : null}
         <div className='flex w-full flex-col gap-2'>
           <div className='space-y-px'>
@@ -313,5 +320,20 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
 }
 
 function isFileWithPreview(file: File): file is File & { preview: string } {
-  return 'preview' in file && typeof file.preview === 'string';
+  // Only treat as previewable image if it has a preview URL AND is an image type
+  return (
+    'preview' in file &&
+    typeof (file as any).preview === 'string' &&
+    typeof file.type === 'string' &&
+    file.type.startsWith('image/')
+  );
+}
+
+function isDocumentFile(file: File): boolean {
+  const documentTypes = [
+    'application/pdf',
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
+  ];
+  return documentTypes.includes(file.type);
 }

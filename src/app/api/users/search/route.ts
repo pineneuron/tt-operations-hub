@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { UserRole } from '@/types/user-role';
+import { UserRole as PrismaUserRole } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
@@ -18,20 +19,32 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim() || '';
+    const role = searchParams.get('role');
 
     if (!query || query.length < 2) {
       return NextResponse.json({ users: [] });
     }
 
+    const where: any = {
+      OR: [
+        { name: { contains: query, mode: 'insensitive' } },
+        { email: { contains: query, mode: 'insensitive' } },
+        { username: { contains: query, mode: 'insensitive' } }
+      ],
+      isActive: true
+    };
+
+    // Filter by role if provided
+    if (role) {
+      // Validate and cast role to Prisma enum
+      const validRoles = Object.values(PrismaUserRole);
+      if (validRoles.includes(role as PrismaUserRole)) {
+        where.role = role as PrismaUserRole;
+      }
+    }
+
     const users = await prisma.user.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { email: { contains: query, mode: 'insensitive' } },
-          { username: { contains: query, mode: 'insensitive' } }
-        ],
-        isActive: true
-      },
+      where,
       select: {
         id: true,
         name: true,

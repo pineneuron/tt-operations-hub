@@ -64,39 +64,22 @@ export const navItems: NavItem[] = [
     roles: [], // Available to all roles
     items: [
       {
+        title: 'All Events',
+        url: '/dashboard/events',
+        icon: 'events',
+        roles: []
+      },
+      {
         title: 'Upcoming Events',
-        url: '/dashboard/events/upcoming',
+        url: '/dashboard/events?type=upcoming',
         icon: 'upcoming',
         roles: []
       },
       {
         title: 'Past Events',
-        url: '/dashboard/events/past',
+        url: '/dashboard/events?type=past',
         icon: 'past',
         roles: []
-      },
-      {
-        title: 'Event Updates',
-        url: '/dashboard/events/updates',
-        icon: 'updates',
-        roles: []
-      },
-      {
-        title: 'Event Reports',
-        url: '/dashboard/events/reports',
-        icon: 'reports',
-        roles: [
-          UserRole.STAFF,
-          UserRole.PLATFORM_ADMIN,
-          UserRole.ADMIN,
-          UserRole.FINANCE
-        ]
-      },
-      {
-        title: 'Summary',
-        url: '/dashboard/events/summary',
-        icon: 'summary',
-        roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
       }
     ]
   },
