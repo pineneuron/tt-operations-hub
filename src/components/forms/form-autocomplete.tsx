@@ -138,7 +138,14 @@ export function FormAutocomplete<
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className='w-full p-0' align='start'>
+              <PopoverContent
+                className='w-full max-w-full p-0'
+                align='start'
+                style={{
+                  width: 'var(--radix-popover-trigger-width)',
+                  maxWidth: '100%'
+                }}
+              >
                 <Command>
                   <CommandInput
                     placeholder='Search by name or email...'

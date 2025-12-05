@@ -137,7 +137,9 @@ export async function DELETE(_: Request, props: RouteParams) {
       where: { id: noteId },
       include: {
         meeting: {
-          include: {
+          select: {
+            id: true,
+            organizerId: true,
             participants: {
               select: { userId: true }
             }

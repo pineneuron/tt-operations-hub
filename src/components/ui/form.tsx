@@ -30,7 +30,7 @@ const Form = ({
 }) => {
   return (
     <FormProvider {...form}>
-      <form onSubmit={onSubmit} className={className}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={className}>
         {children}
       </form>
     </FormProvider>

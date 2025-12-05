@@ -79,7 +79,17 @@ export async function GET(request: Request) {
       ];
     }
 
-    const [jobs, total] = await Promise.all([
+    // Priority order mapping: URGENT=4, HIGH=3, MEDIUM=2, LOW=1, null=0
+    // Prisma enum ordering is alphabetical (LOW, MEDIUM, HIGH, URGENT),
+    // so we need custom sorting to get: URGENT > HIGH > MEDIUM > LOW
+    const priorityOrder: Record<string, number> = {
+      URGENT: 4,
+      HIGH: 3,
+      MEDIUM: 2,
+      LOW: 1
+    };
+
+    const [allJobs, total] = await Promise.all([
       prisma.job.findMany({
         where,
         include: {
@@ -100,16 +110,33 @@ export async function GET(request: Request) {
             }
           }
         },
-        orderBy: [
-          { priority: 'desc' },
-          { dueDate: 'asc' },
-          { createdAt: 'desc' }
-        ],
-        skip,
-        take: limit
+        orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }]
       }),
       prisma.job.count({ where })
     ]);
+
+    // Sort by priority (custom order), then by dueDate, then by createdAt
+    const sortedJobs = allJobs.sort((a, b) => {
+      // Priority comparison (descending: higher priority first)
+      const aPriority = a.priority ? priorityOrder[a.priority] || 0 : 0;
+      const bPriority = b.priority ? priorityOrder[b.priority] || 0 : 0;
+      if (bPriority !== aPriority) {
+        return bPriority - aPriority;
+      }
+
+      // Due date comparison (ascending: earlier dates first)
+      if (a.dueDate && b.dueDate) {
+        return a.dueDate.getTime() - b.dueDate.getTime();
+      }
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+
+      // Created date comparison (descending: newer first)
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+
+    // Apply pagination after sorting
+    const jobs = sortedJobs.slice(skip, skip + limit);
 
     const formattedJobs = jobs.map((job) => ({
       id: job.id,

@@ -1,19 +1,23 @@
 import admin from 'firebase-admin';
 
-// Initialize Firebase Admin SDK
+// Initialize Firebase Admin SDK (optional - fails gracefully if not configured)
 if (!admin.apps.length) {
   try {
     const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     if (!serviceAccount) {
-      throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY is not configured');
+      console.warn(
+        'FIREBASE_SERVICE_ACCOUNT_KEY is not configured - Firebase Admin will not be initialized'
+      );
+      // Firebase is optional - continue without throwing
+    } else {
+      const serviceAccountJson = JSON.parse(serviceAccount);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccountJson)
+      });
     }
-
-    const serviceAccountJson = JSON.parse(serviceAccount);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccountJson)
-    });
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error);
+    // Firebase is optional - continue without throwing
   }
 }
 
@@ -29,7 +33,9 @@ export async function sendFCMNotification(
   data?: Record<string, string>
 ): Promise<{ success: number; failure: number }> {
   if (!admin.apps.length) {
-    console.error('Firebase Admin is not initialized');
+    console.warn(
+      'Firebase Admin is not initialized - FCM notifications will not be sent'
+    );
     return { success: 0, failure: tokens.length };
   }
 

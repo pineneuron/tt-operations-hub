@@ -32,6 +32,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Validate that exactly one ID is provided
+    const providedIds = [eventId, jobId, meetingId].filter(Boolean);
+    if (providedIds.length === 0) {
+      return NextResponse.json(
+        { error: 'One of eventId, jobId, or meetingId must be provided' },
+        { status: 400 }
+      );
+    }
+    if (providedIds.length > 1) {
+      return NextResponse.json(
+        {
+          error:
+            'Only one of eventId, jobId, or meetingId can be provided at a time'
+        },
+        { status: 400 }
+      );
+    }
+
     // Validate file type
     const validImageTypes = [
       'image/jpeg',

@@ -357,13 +357,11 @@ export async function PUT(request: Request, props: RouteParams) {
         participantIds.length > 0
       ) {
         await prisma.meetingReminder.createMany({
-          data: participantIds.flatMap((userId) =>
-            validatedData.reminderMinutes!.map((minutes) => ({
-              meetingId,
-              userId,
-              reminderMinutes: [minutes]
-            }))
-          ),
+          data: participantIds.map((userId) => ({
+            meetingId,
+            userId,
+            reminderMinutes: validatedData.reminderMinutes
+          })),
           skipDuplicates: true
         });
       }

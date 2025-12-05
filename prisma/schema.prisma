@@ -187,6 +187,28 @@ enum RecurrenceFrequency {
   MONTHLY
 }
 
+enum TransportationStatus {
+  PENDING
+  CONFIRMED
+  IN_TRANSIT
+  COMPLETED
+  CANCELLED
+}
+
+enum TransportationType {
+  PICKUP
+  DROPOFF
+  ROUND_TRIP
+  DELIVERY
+}
+
+enum DeliveryStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -201,33 +223,38 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts             Account[]
-  sessions             Session[]
-  otpTokens            OtpToken[]
-  passwordResetTokens  PasswordResetToken[]
-  rolePermissions      RolePermission[]
-  eventsAsClient       Event[]               @relation("ClientEvents")
-  eventParticipants    EventParticipant[]
-  eventUpdates         EventUpdate[]
-  eventReports         EventReport[]
-  eventMediaUploads    EventMedia[]
-  jobAssignments       JobAssignment[]
-  jobsCreated          Job[]                 @relation("JobsCreated")
-  jobsUpdated          Job[]                 @relation("JobsUpdated")
-  jobUpdates           JobUpdate[]
-  jobMediaUploads      JobMedia[]
-  notificationsCreated Notification[]        @relation("NotificationsCreated")
-  notificationReceipts NotificationReceipt[]
-  attendanceSessions   AttendanceSession[]
-  leaveRequests        LeaveRequest[]
-  leaveBalances        LeaveBalance[]
-  leaveApprovals       LeaveRequest[]        @relation("LeaveApprovals")
-  fcmTokens            FcmToken[]
-  meetingsOrganized    Meeting[]             @relation("MeetingOrganizer")
-  meetingParticipants  MeetingParticipant[]
-  meetingNotes         MeetingNote[]
-  meetingMediaUploads  MeetingMedia[]
-  meetingReminders     MeetingReminder[]
+  accounts                      Account[]
+  sessions                      Session[]
+  otpTokens                     OtpToken[]
+  passwordResetTokens           PasswordResetToken[]
+  rolePermissions               RolePermission[]
+  eventsAsClient                Event[]                 @relation("ClientEvents")
+  eventParticipants             EventParticipant[]
+  eventUpdates                  EventUpdate[]
+  eventReports                  EventReport[]
+  eventMediaUploads             EventMedia[]
+  jobAssignments                JobAssignment[]
+  jobsCreated                   Job[]                   @relation("JobsCreated")
+  jobsUpdated                   Job[]                   @relation("JobsUpdated")
+  jobUpdates                    JobUpdate[]
+  jobMediaUploads               JobMedia[]
+  notificationsCreated          Notification[]          @relation("NotificationsCreated")
+  notificationReceipts          NotificationReceipt[]
+  attendanceSessions            AttendanceSession[]
+  leaveRequests                 LeaveRequest[]
+  leaveBalances                 LeaveBalance[]
+  leaveApprovals                LeaveRequest[]          @relation("LeaveApprovals")
+  fcmTokens                     FcmToken[]
+  meetingsOrganized             Meeting[]               @relation("MeetingOrganizer")
+  meetingParticipants           MeetingParticipant[]
+  meetingNotes                  MeetingNote[]
+  meetingMediaUploads           MeetingMedia[]
+  meetingReminders              MeetingReminder[]
+  transportationBookingsCreated TransportationBooking[] @relation("TransportationBookingsCreated")
+  transportationBookingsUpdated TransportationBooking[] @relation("TransportationBookingsUpdated")
+  transportationVendorSupplier  TransportationBooking[] @relation("TransportationVendorSupplier")
+  transportationEntriesCreated  TransportationEntry[]   @relation("TransportationEntriesCreated")
+  transportationEntriesUpdated  TransportationEntry[]   @relation("TransportationEntriesUpdated")
 
   @@map("users")
 }
@@ -825,4 +852,92 @@ model MeetingReminder {
   @@index([meetingId])
   @@index([userId])
   @@map("meeting_reminders")
+}
+
+model TransportationBooking {
+  id          String               @id @default(cuid())
+  title       String // Brief description of the booking
+  description String?              @db.Text // Detailed requirements
+  type        TransportationType
+  status      TransportationStatus @default(PENDING)
+
+  // Pickup details
+  pickupLocation     String
+  pickupDate         DateTime
+  pickupTime         DateTime?
+  pickupContactName  String?
+  pickupContactPhone String?
+
+  // Dropoff details
+  dropoffLocation     String
+  dropoffDate         DateTime?
+  dropoffTime         DateTime?
+  dropoffContactName  String?
+  dropoffContactPhone String?
+
+  // Assignment
+  vendorSupplierId String? // Selected Vendor/Supplier (VENDOR_SUPPLIER role)
+  createdById      String // Staff who created the booking
+  updatedById      String
+
+  // Metadata
+  metadata  Json? // Additional flexible data
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  vendorSupplier User?                @relation("TransportationVendorSupplier", fields: [vendorSupplierId], references: [id], onDelete: SetNull)
+  createdBy      User                 @relation("TransportationBookingsCreated", fields: [createdById], references: [id])
+  updatedBy      User                 @relation("TransportationBookingsUpdated", fields: [updatedById], references: [id])
+  entry          TransportationEntry? // One-to-one relationship
+
+  @@index([status])
+  @@index([type])
+  @@index([vendorSupplierId])
+  @@index([createdById])
+  @@index([pickupDate])
+  @@map("transportation_bookings")
+}
+
+model TransportationEntry {
+  id             String             @id @default(cuid())
+  bookingId      String?            @unique // Optional link to booking (can be standalone)
+  type           TransportationType
+  deliveryStatus DeliveryStatus? // For delivery type entries
+
+  // Vehicle details
+  vehicleNumber String
+  driverName    String
+  driverPhone   String?
+
+  // Actual trip details
+  actualPickupLocation String
+  actualPickupDate     DateTime
+  actualPickupTime     DateTime?
+
+  actualDropoffLocation String
+  actualDropoffDate     DateTime?
+  actualDropoffTime     DateTime?
+
+  // Additional details
+  notes    String? @db.Text
+  metadata Json? // Additional flexible data
+
+  // Tracking
+  createdById String // Vendor/Supplier or Staff/Admin who created
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  booking   TransportationBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  createdBy User                   @relation("TransportationEntriesCreated", fields: [createdById], references: [id])
+  updatedBy User                   @relation("TransportationEntriesUpdated", fields: [updatedById], references: [id])
+
+  @@index([bookingId])
+  @@index([type])
+  @@index([deliveryStatus])
+  @@index([createdById])
+  @@index([actualPickupDate])
+  @@map("transportation_entries")
 }

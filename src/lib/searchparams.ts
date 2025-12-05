@@ -25,7 +25,8 @@ export const searchParams = {
   type: parseAsString, // upcoming | past
   filterType: parseAsString, // upcoming | past | today (for meetings)
   eventId: parseAsString,
-  assigneeId: parseAsString
+  assigneeId: parseAsString,
+  tab: parseAsString // bookings | entries (for transportation)
   // advanced filter
   // filters: getFiltersStateParser().withDefault([]),
   // joinOperator: parseAsStringEnum(['and', 'or']).withDefault('and')
