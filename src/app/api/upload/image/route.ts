@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { uploadToR2, validateR2Config } from '@/lib/r2';
 import { prisma } from '@/lib/db';
-import { EventMediaType } from '@prisma/client';
+import { EventMediaType, JobMediaType, MeetingMediaType } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -25,6 +25,8 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const eventId = formData.get('eventId') as string | null;
+    const jobId = formData.get('jobId') as string | null;
+    const meetingId = formData.get('meetingId') as string | null;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -78,10 +80,11 @@ export async function POST(request: Request) {
 
     let mediaId: string | null = null;
 
+    // Determine media type based on file type
+    const isImage = validImageTypes.includes(file.type);
+
     // If an eventId is provided, create an EventMedia record
     if (eventId) {
-      // Determine media type based on file type
-      const isImage = validImageTypes.includes(file.type);
       const mediaType = isImage
         ? EventMediaType.PHOTO
         : EventMediaType.DOCUMENT;
@@ -91,7 +94,42 @@ export async function POST(request: Request) {
           eventId,
           uploadedById: session.user.id,
           type: mediaType,
-          url
+          url,
+          size: file.size
+        }
+      });
+      mediaId = media.id;
+    }
+
+    // If a jobId is provided, create a JobMedia record
+    if (jobId) {
+      const mediaType = isImage ? JobMediaType.PHOTO : JobMediaType.DOCUMENT;
+
+      const media = await prisma.jobMedia.create({
+        data: {
+          jobId,
+          uploadedById: session.user.id,
+          type: mediaType,
+          url,
+          size: file.size
+        }
+      });
+      mediaId = media.id;
+    }
+
+    // If a meetingId is provided, create a MeetingMedia record
+    if (meetingId) {
+      const mediaType = isImage
+        ? MeetingMediaType.IMAGE
+        : MeetingMediaType.DOCUMENT;
+
+      const media = await prisma.meetingMedia.create({
+        data: {
+          meetingId,
+          uploadedById: session.user.id,
+          type: mediaType,
+          url,
+          size: file.size
         }
       });
       mediaId = media.id;

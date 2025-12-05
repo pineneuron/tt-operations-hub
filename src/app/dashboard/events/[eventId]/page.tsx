@@ -1,7 +1,6 @@
 import PageContainer from '@/components/layout/page-container';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { prisma } from '@/lib/db';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
@@ -12,12 +11,7 @@ import { cn, formatBytes } from '@/lib/utils';
 import { EventStatus } from '@prisma/client';
 import { EventMediaItem } from '@/components/event-media-item';
 import { EventBreadcrumbSetter } from '@/components/event-breadcrumb-setter';
-import {
-  IconInfoCircle,
-  IconHistory,
-  IconReport,
-  IconPhoto
-} from '@tabler/icons-react';
+import { EventDetailTabs } from '@/features/events/components/event-detail-tabs';
 
 type PageProps = {
   params: Promise<{
@@ -273,27 +267,8 @@ export default async function EventDetailPage(props: PageProps) {
 
         <Separator />
 
-        <Tabs defaultValue='overview' className='flex-1'>
-          <TabsList>
-            <TabsTrigger value='overview' className='gap-2'>
-              <IconInfoCircle className='h-4 w-4' />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value='updates' className='gap-2'>
-              <IconHistory className='h-4 w-4' />
-              Updates Timeline
-            </TabsTrigger>
-            <TabsTrigger value='reports' className='gap-2'>
-              <IconReport className='h-4 w-4' />
-              Reports
-            </TabsTrigger>
-            <TabsTrigger value='media' className='gap-2'>
-              <IconPhoto className='h-4 w-4' />
-              Media Gallery
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value='overview' className='mt-4'>
+        <EventDetailTabs
+          overviewContent={
             <div className='flex flex-col gap-6 lg:flex-row'>
               <div className='bg-card flex-1 space-y-4 rounded-lg border p-4'>
                 <h3 className='text-sm font-semibold'>Event Summary</h3>
@@ -373,227 +348,235 @@ export default async function EventDetailPage(props: PageProps) {
                 )}
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value='updates' className='mt-4'>
-            {event.updates.length === 0 ? (
-              <p className='text-muted-foreground text-sm'>
-                No updates have been posted for this event yet.
-              </p>
-            ) : (
-              <div className='mb-8 flex justify-center'>
-                <div className='w-full max-w-2xl space-y-8'>
-                  {groupedUpdates.map((group) => (
-                    <div key={group.label} className='space-y-4'>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>
-                          {group.label}
-                        </span>
-                      </div>
-                      <div className='relative space-y-4 pl-8'>
-                        <div className='bg-border absolute top-[10px] bottom-[10px] left-3 w-px' />
-                        {group.items.map((update, index) => (
-                          <div key={update.id} className='relative'>
-                            <div className='bg-muted-foreground/40 absolute top-2.5 -left-[23px] h-2 w-2 rounded-full' />
-                            <div className='space-y-2'>
-                              <div>
-                                <span className='text-muted-foreground text-xs'>
-                                  {formatTimelineDate(update.createdAt)}
-                                </span>
-                              </div>
-                              <div className='w-full max-w-md rounded-lg border p-4'>
-                                <div className='space-y-3'>
-                                  <div className='space-y-1'>
-                                    <div className='flex justify-between gap-2 pb-2'>
-                                      <div className='flex items-center gap-2'>
-                                        <Avatar className='h-8 w-8'>
-                                          <AvatarImage
-                                            src={update.createdBy?.image || ''}
-                                            alt={
-                                              update.createdBy?.name ||
-                                              update.createdBy?.email ||
-                                              'User'
-                                            }
-                                          />
-                                          <AvatarFallback>
-                                            {(() => {
-                                              const name =
-                                                update.createdBy?.name ||
-                                                update.createdBy?.email ||
-                                                'U';
-                                              const firstName = name.includes(
-                                                '@'
-                                              )
-                                                ? name.split('@')[0]
-                                                : name.split(' ')[0];
-                                              return firstName
-                                                .slice(0, 1)
-                                                .toUpperCase();
-                                            })()}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                        <div className='flex flex-col'>
-                                          <span className='text-sm font-medium'>
-                                            {(() => {
-                                              const name =
-                                                update.createdBy?.name ||
-                                                update.createdBy?.email ||
-                                                'Unknown';
-                                              if (name.includes('@')) {
-                                                return name.split('@')[0];
+          }
+          updatesContent={
+            <>
+              {event.updates.length === 0 ? (
+                <p className='text-muted-foreground text-sm'>
+                  No updates have been posted for this event yet.
+                </p>
+              ) : (
+                <div className='mb-8 flex justify-center'>
+                  <div className='w-full max-w-2xl space-y-8'>
+                    {groupedUpdates.map((group) => (
+                      <div key={group.label} className='space-y-4'>
+                        <div className='flex items-center gap-2'>
+                          <span className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>
+                            {group.label}
+                          </span>
+                        </div>
+                        <div className='relative space-y-4 pl-8'>
+                          <div className='bg-border absolute top-[10px] bottom-[10px] left-3 w-px' />
+                          {group.items.map((update, index) => (
+                            <div key={update.id} className='relative'>
+                              <div className='bg-muted-foreground/40 absolute top-2.5 -left-[23px] h-2 w-2 rounded-full' />
+                              <div className='space-y-2'>
+                                <div>
+                                  <span className='text-muted-foreground text-xs'>
+                                    {formatTimelineDate(update.createdAt)}
+                                  </span>
+                                </div>
+                                <div className='w-full max-w-md rounded-lg border p-4'>
+                                  <div className='space-y-3'>
+                                    <div className='space-y-1'>
+                                      <div className='flex justify-between gap-2 pb-2'>
+                                        <div className='flex items-center gap-2'>
+                                          <Avatar className='h-8 w-8'>
+                                            <AvatarImage
+                                              src={
+                                                update.createdBy?.image || ''
                                               }
-                                              return name.split(' ')[0];
-                                            })()}
-                                          </span>
-                                          <span className='text-muted-foreground text-[10px]'>
-                                            {formatTimeAgo(update.createdAt)}
-                                          </span>
+                                              alt={
+                                                update.createdBy?.name ||
+                                                update.createdBy?.email ||
+                                                'User'
+                                              }
+                                            />
+                                            <AvatarFallback>
+                                              {(() => {
+                                                const name =
+                                                  update.createdBy?.name ||
+                                                  update.createdBy?.email ||
+                                                  'U';
+                                                const firstName = name.includes(
+                                                  '@'
+                                                )
+                                                  ? name.split('@')[0]
+                                                  : name.split(' ')[0];
+                                                return firstName
+                                                  .slice(0, 1)
+                                                  .toUpperCase();
+                                              })()}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div className='flex flex-col'>
+                                            <span className='text-sm font-medium'>
+                                              {(() => {
+                                                const name =
+                                                  update.createdBy?.name ||
+                                                  update.createdBy?.email ||
+                                                  'Unknown';
+                                                if (name.includes('@')) {
+                                                  return name.split('@')[0];
+                                                }
+                                                return name.split(' ')[0];
+                                              })()}
+                                            </span>
+                                            <span className='text-muted-foreground text-[10px]'>
+                                              {formatTimeAgo(update.createdAt)}
+                                            </span>
+                                          </div>
                                         </div>
-                                      </div>
-                                      <div className='flex items-center gap-1'>
-                                        <Badge
-                                          variant='outline'
-                                          className={cn(
-                                            'border-transparent text-[10px]',
-                                            getUpdateTypeBadgeColor(update.type)
-                                          )}
-                                        >
-                                          {update.type}
-                                        </Badge>
-                                        {update.status && (
+                                        <div className='flex items-center gap-1'>
                                           <Badge
                                             variant='outline'
                                             className={cn(
                                               'border-transparent text-[10px]',
-                                              getEventStatusBadgeColor(
-                                                update.status
+                                              getUpdateTypeBadgeColor(
+                                                update.type
                                               )
                                             )}
                                           >
-                                            {update.status.replace('_', ' ')}
+                                            {update.type}
                                           </Badge>
-                                        )}
+                                          {update.status && (
+                                            <Badge
+                                              variant='outline'
+                                              className={cn(
+                                                'border-transparent text-[10px]',
+                                                getEventStatusBadgeColor(
+                                                  update.status
+                                                )
+                                              )}
+                                            >
+                                              {update.status.replace('_', ' ')}
+                                            </Badge>
+                                          )}
+                                        </div>
                                       </div>
+                                      <p className='text-muted-foreground text-sm whitespace-pre-line'>
+                                        {update.message}
+                                      </p>
                                     </div>
-                                    <p className='text-muted-foreground text-sm whitespace-pre-line'>
-                                      {update.message}
-                                    </p>
+                                    {update.media &&
+                                      update.media.length > 0 && (
+                                        <div className='flex flex-wrap gap-3'>
+                                          {update.media.map((media) => (
+                                            <EventMediaItem
+                                              key={media.id}
+                                              media={media}
+                                              size='medium'
+                                            />
+                                          ))}
+                                        </div>
+                                      )}
                                   </div>
-                                  {update.media && update.media.length > 0 && (
-                                    <div className='flex flex-wrap gap-3'>
-                                      {update.media.map((media) => (
-                                        <EventMediaItem
-                                          key={media.id}
-                                          media={media}
-                                          size='medium'
-                                        />
-                                      ))}
-                                    </div>
-                                  )}
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          }
+          reportsContent={
+            <>
+              {event.reports.length === 0 ? (
+                <p className='text-muted-foreground text-sm'>
+                  No reports have been submitted for this event yet.
+                </p>
+              ) : (
+                <div className='space-y-3'>
+                  {event.reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className='bg-background space-y-2 rounded-md border p-3'
+                    >
+                      <div className='flex items-center justify-between gap-2'>
+                        <div className='flex flex-col'>
+                          <span className='text-sm font-medium'>
+                            {report.submittedBy?.name ||
+                              report.submittedBy?.email ||
+                              'Unknown'}
+                          </span>
+                          <span className='text-muted-foreground text-xs'>
+                            {formatDateTime(report.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                      {report.summary && (
+                        <p className='text-sm whitespace-pre-line'>
+                          {report.summary}
+                        </p>
+                      )}
+                      {report.attachments && report.attachments.length > 0 && (
+                        <div className='mt-2 flex flex-wrap gap-3'>
+                          {report.attachments.map((media) => {
+                            const bytes = (media as any).size as
+                              | number
+                              | undefined;
+                            const sizeLabel =
+                              typeof bytes === 'number'
+                                ? formatBytes(bytes, { decimals: 1 })
+                                : null;
+
+                            const metaLabel = ['ATTACHMENT', sizeLabel]
+                              .filter(Boolean)
+                              .join(' · ');
+
+                            return (
+                              <a
+                                key={media.id}
+                                href={media.url}
+                                target='_blank'
+                                rel='noreferrer'
+                                className='group flex flex-col items-center gap-1 text-center'
+                              >
+                                <div className='bg-muted/50 flex h-16 w-16 items-center justify-center rounded-md border'>
+                                  <span className='text-muted-foreground text-[10px] font-medium'>
+                                    FILE
+                                  </span>
+                                </div>
+                                {metaLabel && (
+                                  <span className='text-muted-foreground text-[10px]'>
+                                    {metaLabel}
+                                  </span>
+                                )}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value='reports' className='mt-4'>
-            {event.reports.length === 0 ? (
-              <p className='text-muted-foreground text-sm'>
-                No reports have been submitted for this event yet.
-              </p>
-            ) : (
-              <div className='space-y-3'>
-                {event.reports.map((report) => (
-                  <div
-                    key={report.id}
-                    className='bg-background space-y-2 rounded-md border p-3'
-                  >
-                    <div className='flex items-center justify-between gap-2'>
-                      <div className='flex flex-col'>
-                        <span className='text-sm font-medium'>
-                          {report.submittedBy?.name ||
-                            report.submittedBy?.email ||
-                            'Unknown'}
-                        </span>
-                        <span className='text-muted-foreground text-xs'>
-                          {formatDateTime(report.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                    {report.summary && (
-                      <p className='text-sm whitespace-pre-line'>
-                        {report.summary}
-                      </p>
-                    )}
-                    {report.attachments && report.attachments.length > 0 && (
-                      <div className='mt-2 flex flex-wrap gap-3'>
-                        {report.attachments.map((media) => {
-                          const bytes = (media as any).size as
-                            | number
-                            | undefined;
-                          const sizeLabel =
-                            typeof bytes === 'number'
-                              ? formatBytes(bytes, { decimals: 1 })
-                              : null;
-
-                          const metaLabel = ['ATTACHMENT', sizeLabel]
-                            .filter(Boolean)
-                            .join(' · ');
-
-                          return (
-                            <a
-                              key={media.id}
-                              href={media.url}
-                              target='_blank'
-                              rel='noreferrer'
-                              className='group flex flex-col items-center gap-1 text-center'
-                            >
-                              <div className='bg-muted/50 flex h-16 w-16 items-center justify-center rounded-md border'>
-                                <span className='text-muted-foreground text-[10px] font-medium'>
-                                  FILE
-                                </span>
-                              </div>
-                              {metaLabel && (
-                                <span className='text-muted-foreground text-[10px]'>
-                                  {metaLabel}
-                                </span>
-                              )}
-                            </a>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value='media' className='mt-4'>
-            {event.media.length === 0 ? (
-              <p className='text-muted-foreground text-sm'>
-                No media have been uploaded for this event yet.
-              </p>
-            ) : (
-              <div className='grid grid-cols-4 gap-3'>
-                {event.media.map((media) => (
-                  <EventMediaItem
-                    key={media.id}
-                    media={media}
-                    aspectRatio='video'
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              )}
+            </>
+          }
+          mediaContent={
+            <>
+              {event.media.length === 0 ? (
+                <p className='text-muted-foreground text-sm'>
+                  No media have been uploaded for this event yet.
+                </p>
+              ) : (
+                <div className='grid grid-cols-4 gap-3'>
+                  {event.media.map((media) => (
+                    <EventMediaItem
+                      key={media.id}
+                      media={media}
+                      aspectRatio='video'
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          }
+        />
       </div>
     </PageContainer>
   );

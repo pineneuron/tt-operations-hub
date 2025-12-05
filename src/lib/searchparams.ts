@@ -22,7 +22,10 @@ export const searchParams = {
   workLocation: parseAsString,
   search: parseAsString,
   clientId: parseAsString,
-  type: parseAsString // upcoming | past
+  type: parseAsString, // upcoming | past
+  filterType: parseAsString, // upcoming | past | today (for meetings)
+  eventId: parseAsString,
+  assigneeId: parseAsString
   // advanced filter
   // filters: getFiltersStateParser().withDefault([]),
   // joinOperator: parseAsStringEnum(['and', 'or']).withDefault('and')

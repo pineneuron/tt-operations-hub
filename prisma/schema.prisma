@@ -35,8 +35,23 @@ enum EventStatus {
 enum JobStatus {
   NOT_STARTED
   IN_PROGRESS
+  IN_REVIEW
   BLOCKED
   COMPLETED
+}
+
+enum JobPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum JobUpdateType {
+  STATUS
+  MILESTONE
+  ISSUE
+  NOTE
 }
 
 enum EventParticipantRole {
@@ -56,6 +71,13 @@ enum EventUpdateType {
 }
 
 enum EventMediaType {
+  PHOTO
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+enum JobMediaType {
   PHOTO
   VIDEO
   DOCUMENT
@@ -122,6 +144,49 @@ enum HalfDayType {
   SECOND_HALF
 }
 
+enum MeetingStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  POSTPONED
+}
+
+enum MeetingType {
+  CLIENT_MEETING
+  INTERNAL_MEETING
+  VENDOR_MEETING
+  KICKOFF_MEETING
+  REVIEW_MEETING
+  STANDUP
+  OTHER
+}
+
+enum MeetingParticipantRole {
+  ORGANIZER
+  ATTENDEE
+}
+
+enum MeetingNoteType {
+  AGENDA
+  MINUTES
+  NOTE
+}
+
+enum MeetingMediaType {
+  DOCUMENT
+  PRESENTATION
+  IMAGE
+  OTHER
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  BI_WEEKLY
+  MONTHLY
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -149,6 +214,8 @@ model User {
   jobAssignments       JobAssignment[]
   jobsCreated          Job[]                 @relation("JobsCreated")
   jobsUpdated          Job[]                 @relation("JobsUpdated")
+  jobUpdates           JobUpdate[]
+  jobMediaUploads      JobMedia[]
   notificationsCreated Notification[]        @relation("NotificationsCreated")
   notificationReceipts NotificationReceipt[]
   attendanceSessions   AttendanceSession[]
@@ -156,6 +223,11 @@ model User {
   leaveBalances        LeaveBalance[]
   leaveApprovals       LeaveRequest[]        @relation("LeaveApprovals")
   fcmTokens            FcmToken[]
+  meetingsOrganized    Meeting[]             @relation("MeetingOrganizer")
+  meetingParticipants  MeetingParticipant[]
+  meetingNotes         MeetingNote[]
+  meetingMediaUploads  MeetingMedia[]
+  meetingReminders     MeetingReminder[]
 
   @@map("users")
 }
@@ -297,28 +369,29 @@ model NotificationReceipt {
 }
 
 model Job {
-  id           String    @id @default(cuid())
-  title        String
-  remarks      String?
-  status       JobStatus @default(NOT_STARTED)
-  priority     Int?
-  assignedDate DateTime?
-  dueDate      DateTime?
-  completedAt  DateTime?
-  eventId      String?
-  createdById  String
-  updatedById  String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String       @id @default(cuid())
+  title       String
+  remarks     String?
+  status      JobStatus    @default(NOT_STARTED)
+  priority    JobPriority?
+  dueDate     DateTime?
+  completedAt DateTime?
+  eventId     String?
+  createdById String
+  updatedById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   event     Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
   createdBy User            @relation("JobsCreated", fields: [createdById], references: [id])
   updatedBy User            @relation("JobsUpdated", fields: [updatedById], references: [id])
   assignees JobAssignment[]
+  updates   JobUpdate[]
+  media     JobMedia[]
 
   @@index([eventId])
   @@index([status])
-  @@index([assignedDate])
+  @@index([priority])
   @@map("jobs")
 }
 
@@ -335,6 +408,46 @@ model JobAssignment {
   @@unique([jobId, userId])
   @@index([userId])
   @@map("job_assignments")
+}
+
+model JobUpdate {
+  id          String        @id @default(cuid())
+  jobId       String
+  createdById String
+  type        JobUpdateType @default(NOTE)
+  status      JobStatus?
+  message     String
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+
+  job       Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdBy User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  media     JobMedia[] @relation("UpdateMedia")
+
+  @@index([jobId])
+  @@index([createdById])
+  @@map("job_updates")
+}
+
+model JobMedia {
+  id           String       @id @default(cuid())
+  jobId        String
+  updateId     String? // Link to JobUpdate (for updates with images)
+  uploadedById String
+  type         JobMediaType @default(PHOTO)
+  url          String
+  description  String?
+  size         Int?
+  createdAt    DateTime     @default(now())
+
+  job        Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  update     JobUpdate? @relation("UpdateMedia", fields: [updateId], references: [id], onDelete: Cascade)
+  uploadedBy User       @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([updateId])
+  @@index([uploadedById])
+  @@map("job_media")
 }
 
 model Account {
@@ -591,4 +704,125 @@ model FcmToken {
   @@index([userId])
   @@index([token])
   @@map("fcm_tokens")
+}
+
+model Meeting {
+  id          String        @id @default(cuid())
+  title       String
+  description String?       @db.Text
+  agenda      String?       @db.Text
+  startTime   DateTime
+  endTime     DateTime
+  location    String? // Physical location or "Virtual"
+  meetingLink String? // Video call link (Zoom, Teams, etc.)
+  status      MeetingStatus @default(SCHEDULED)
+  type        MeetingType   @default(INTERNAL_MEETING)
+  organizerId String
+  isRecurring Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  organizer    User                 @relation("MeetingOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  participants MeetingParticipant[]
+  notes        MeetingNote[]
+  media        MeetingMedia[]
+  recurrence   MeetingRecurrence?
+  reminders    MeetingReminder[]
+
+  @@index([organizerId])
+  @@index([startTime])
+  @@index([status])
+  @@index([type])
+  @@map("meetings")
+}
+
+model MeetingParticipant {
+  id        String                 @id @default(cuid())
+  meetingId String
+  userId    String
+  role      MeetingParticipantRole @default(ATTENDEE)
+  invitedBy String?
+  createdAt DateTime               @default(now())
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, userId])
+  @@index([userId])
+  @@index([meetingId])
+  @@map("meeting_participants")
+}
+
+model MeetingNote {
+  id          String          @id @default(cuid())
+  meetingId   String
+  createdById String
+  type        MeetingNoteType @default(NOTE)
+  content     String          @db.Text
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  meeting   Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  createdBy User           @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  media     MeetingMedia[] @relation("NoteMedia")
+
+  @@index([meetingId])
+  @@index([createdById])
+  @@map("meeting_notes")
+}
+
+model MeetingMedia {
+  id           String           @id @default(cuid())
+  meetingId    String
+  noteId       String? // Link to MeetingNote (for notes with attachments)
+  uploadedById String
+  type         MeetingMediaType @default(DOCUMENT)
+  url          String
+  description  String?
+  size         Int?
+  createdAt    DateTime         @default(now())
+
+  meeting    Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  note       MeetingNote? @relation("NoteMedia", fields: [noteId], references: [id], onDelete: Cascade)
+  uploadedBy User         @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([noteId])
+  @@index([uploadedById])
+  @@map("meeting_media")
+}
+
+model MeetingRecurrence {
+  id          String              @id @default(cuid())
+  meetingId   String              @unique
+  frequency   RecurrenceFrequency
+  interval    Int                 @default(1) // Every N days/weeks/months
+  endDate     DateTime? // End date for recurrence
+  occurrences Int? // Number of occurrences (alternative to endDate)
+  daysOfWeek  Int[] // For weekly: [1,3,5] = Mon, Wed, Fri (0=Sunday, 6=Saturday), empty array if not applicable
+  dayOfMonth  Int? // For monthly: day of month (1-31)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@map("meeting_recurrences")
+}
+
+model MeetingReminder {
+  id              String   @id @default(cuid())
+  meetingId       String
+  userId          String
+  reminderMinutes Int[] // Array of minutes before meeting (e.g., [15, 60, 1440] = 15min, 1hr, 1day)
+  createdAt       DateTime @default(now())
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, userId])
+  @@index([meetingId])
+  @@index([userId])
+  @@map("meeting_reminders")
 }

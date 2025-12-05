@@ -56,6 +56,38 @@ export const navItems: NavItem[] = [
     ]
   },
   {
+    title: 'Leaves',
+    url: '/dashboard/leaves',
+    icon: 'leaves',
+    isActive: false,
+    shortcut: ['l', 'l'],
+    items: [
+      {
+        title: 'Leave Requests',
+        url: '/dashboard/leaves',
+        icon: 'leaves',
+        roles: [
+          UserRole.STAFF,
+          UserRole.FINANCE,
+          UserRole.ADMIN,
+          UserRole.PLATFORM_ADMIN
+        ]
+      },
+      {
+        title: 'Public Holidays',
+        url: '/dashboard/leaves/public-holidays',
+        icon: 'holidays',
+        roles: [UserRole.ADMIN, UserRole.PLATFORM_ADMIN]
+      }
+    ],
+    roles: [
+      UserRole.STAFF,
+      UserRole.FINANCE,
+      UserRole.ADMIN,
+      UserRole.PLATFORM_ADMIN
+    ]
+  },
+  {
     title: 'Events',
     url: '/dashboard/events',
     icon: 'events',
@@ -84,7 +116,7 @@ export const navItems: NavItem[] = [
     ]
   },
   {
-    title: 'Meeting',
+    title: 'Meetings',
     url: '/dashboard/meeting',
     icon: 'meeting',
     isActive: false,
@@ -92,22 +124,22 @@ export const navItems: NavItem[] = [
     roles: [], // Available to all roles
     items: [
       {
-        title: 'Upcoming Meeting',
-        url: '/dashboard/meeting/upcoming',
+        title: 'All Meetings',
+        url: '/dashboard/meetings',
+        icon: 'meeting',
+        roles: []
+      },
+      {
+        title: 'Upcoming Meetings',
+        url: '/dashboard/meetings/upcoming',
         icon: 'upcoming',
         roles: []
       },
       {
-        title: 'Past Meeting',
-        url: '/dashboard/meeting/past',
+        title: 'Past Meetings',
+        url: '/dashboard/meetings/past',
         icon: 'past',
         roles: []
-      },
-      {
-        title: 'Summary',
-        url: '/dashboard/meeting/summary',
-        icon: 'summary',
-        roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
       }
     ]
   },
@@ -186,49 +218,21 @@ export const navItems: NavItem[] = [
     icon: 'user',
     isActive: false,
     shortcut: ['u', 'u'],
-    items: [],
-    roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
-  },
-  {
-    title: 'Leaves',
-    url: '/dashboard/leaves',
-    icon: 'leaves',
-    isActive: false,
-    shortcut: ['l', 'l'],
     items: [
       {
-        title: 'Leave Requests',
-        url: '/dashboard/leaves',
-        icon: 'leaves',
-        roles: [
-          UserRole.STAFF,
-          UserRole.FINANCE,
-          UserRole.ADMIN,
-          UserRole.PLATFORM_ADMIN
-        ]
+        title: 'Add New',
+        url: '/dashboard/users',
+        icon: 'add',
+        roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
       },
       {
-        title: 'Public Holidays',
-        url: '/dashboard/leaves/public-holidays',
-        icon: 'holidays',
-        roles: [UserRole.ADMIN, UserRole.PLATFORM_ADMIN]
+        title: 'All Users',
+        url: '/dashboard/users',
+        icon: 'user',
+        roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
       }
     ],
-    roles: [
-      UserRole.STAFF,
-      UserRole.FINANCE,
-      UserRole.ADMIN,
-      UserRole.PLATFORM_ADMIN
-    ]
-  },
-  {
-    title: 'More',
-    url: '/dashboard/more',
-    icon: 'more',
-    isActive: false,
-    shortcut: ['mo', 'mo'],
-    items: [],
-    roles: [] // Available to all roles
+    roles: [UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
   }
 ];
 
