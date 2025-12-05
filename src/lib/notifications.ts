@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/db';
-import { sendFCMNotification } from '@/lib/fcm';
+// TODO: Uncomment when Firebase is needed
+// import { sendFCMNotification } from '@/lib/fcm';
 
 /**
  * Send push notifications to users via FCM
+ * TODO: Uncomment when Firebase is needed
  */
 export async function sendPushNotifications(
   userIds: string[],
@@ -12,6 +14,10 @@ export async function sendPushNotifications(
   },
   data?: Record<string, string>
 ): Promise<void> {
+  // Firebase is disabled - notifications are not sent
+  return;
+
+  /* TODO: Uncomment when Firebase is needed
   if (userIds.length === 0) {
     return;
   }
@@ -50,10 +56,12 @@ export async function sendPushNotifications(
     console.error('Error sending push notifications:', error);
     // Don't throw - notifications are not critical for the main flow
   }
+  */
 }
 
 /**
  * Send push notification to a single user
+ * TODO: Uncomment when Firebase is needed
  */
 export async function sendPushNotificationToUser(
   userId: string,

@@ -1,8 +1,6 @@
 import admin from 'firebase-admin';
 
 // Initialize Firebase Admin SDK (optional - fails gracefully if not configured)
-// TODO: Uncomment when Firebase is needed
-/*
 if (!admin.apps.length) {
   try {
     const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
@@ -17,12 +15,18 @@ if (!admin.apps.length) {
     } else {
       try {
         const serviceAccountJson = JSON.parse(serviceAccount);
-        
+
         // Validate that the JSON has required fields before attempting to initialize
-        if (!serviceAccountJson.private_key || !serviceAccountJson.client_email || !serviceAccountJson.project_id) {
-          throw new Error('Invalid service account key format - missing required fields');
+        if (
+          !serviceAccountJson.private_key ||
+          !serviceAccountJson.client_email ||
+          !serviceAccountJson.project_id
+        ) {
+          throw new Error(
+            'Invalid service account key format - missing required fields'
+          );
         }
-        
+
         // Try to initialize Firebase Admin
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccountJson)
@@ -44,7 +48,6 @@ if (!admin.apps.length) {
     // Firebase is optional - continue without throwing
   }
 }
-*/
 
 /**
  * Send FCM notification to specific user tokens
