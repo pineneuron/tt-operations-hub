@@ -48,7 +48,7 @@ export function TransportationListingWrapper({
           </TabsTrigger>
           <TabsTrigger value='entries' className='gap-2'>
             <IconTruck className='h-4 w-4' />
-            Entries
+            Vehicle Entries
           </TabsTrigger>
         </TabsList>
 

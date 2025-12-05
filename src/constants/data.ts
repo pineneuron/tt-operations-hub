@@ -195,13 +195,13 @@ export const navItems: NavItem[] = [
     items: [
       {
         title: 'Transportation Booking',
-        url: '/dashboard/transportation/booking',
+        url: '/dashboard/transportation',
         icon: 'booking',
         roles: [UserRole.STAFF, UserRole.PLATFORM_ADMIN, UserRole.ADMIN]
       },
       {
         title: 'Transportation Entry',
-        url: '/dashboard/transportation/entry',
+        url: '/dashboard/transportation?tab=entries',
         icon: 'entry',
         roles: [
           UserRole.STAFF,
