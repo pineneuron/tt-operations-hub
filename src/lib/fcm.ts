@@ -1,25 +1,50 @@
 import admin from 'firebase-admin';
 
 // Initialize Firebase Admin SDK (optional - fails gracefully if not configured)
+// TODO: Uncomment when Firebase is needed
+/*
 if (!admin.apps.length) {
   try {
     const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     if (!serviceAccount) {
-      console.warn(
-        'FIREBASE_SERVICE_ACCOUNT_KEY is not configured - Firebase Admin will not be initialized'
-      );
       // Firebase is optional - continue without throwing
+      // Only log in non-production to avoid build warnings
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          'FIREBASE_SERVICE_ACCOUNT_KEY is not configured - Firebase Admin will not be initialized'
+        );
+      }
     } else {
-      const serviceAccountJson = JSON.parse(serviceAccount);
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountJson)
-      });
+      try {
+        const serviceAccountJson = JSON.parse(serviceAccount);
+        
+        // Validate that the JSON has required fields before attempting to initialize
+        if (!serviceAccountJson.private_key || !serviceAccountJson.client_email || !serviceAccountJson.project_id) {
+          throw new Error('Invalid service account key format - missing required fields');
+        }
+        
+        // Try to initialize Firebase Admin
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccountJson)
+        });
+      } catch (parseError) {
+        // If JSON parsing or credential creation fails, log but don't throw
+        // This handles invalid/malformed service account keys gracefully
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(
+            'Failed to initialize Firebase Admin (invalid service account key):',
+            parseError instanceof Error ? parseError.message : 'Invalid format'
+          );
+        }
+        // Firebase is optional - continue without throwing
+      }
     }
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error);
     // Firebase is optional - continue without throwing
   }
 }
+*/
 
 /**
  * Send FCM notification to specific user tokens
