@@ -24,12 +24,14 @@ export default async function Header() {
         <Breadcrumbs />
       </div>
 
-      <div className='flex items-center gap-4 px-4'>
-        <div className='hidden md:flex'>
+      <div className='flex items-center gap-2 pr-4 pl-0 md:gap-4 md:pl-4'>
+        <div className='flex'>
           {showAttendance ? <HeaderAttendanceWidget /> : <SearchInput />}
         </div>
         <Notifications />
-        <ModeToggle />
+        <div className='hidden md:flex'>
+          <ModeToggle />
+        </div>
         <UserNav />
       </div>
     </header>

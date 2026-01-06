@@ -12,10 +12,28 @@ import {
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { IconBrightness, IconSettings, IconUser } from '@tabler/icons-react';
+import { useTheme } from 'next-themes';
+import * as React from 'react';
 
 export function UserNav() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { setTheme, resolvedTheme } = useTheme();
+
+  const handleThemeToggle = React.useCallback(() => {
+    const newMode = resolvedTheme === 'dark' ? 'light' : 'dark';
+    const root = document.documentElement;
+
+    if (!document.startViewTransition) {
+      setTheme(newMode);
+      return;
+    }
+
+    document.startViewTransition(() => {
+      setTheme(newMode);
+    });
+  }, [resolvedTheme, setTheme]);
 
   if (!session?.user) {
     return null;
@@ -49,9 +67,20 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+            <IconUser className='h-4 w-4' />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem>
+            <IconSettings className='h-4 w-4' />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className='inline-flex md:hidden'
+            onClick={handleThemeToggle}
+          >
+            <IconBrightness className='h-4 w-4' />
+            <span>Toggle Theme</span>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem

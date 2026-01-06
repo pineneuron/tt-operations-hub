@@ -356,69 +356,59 @@ export function AttendanceWidget() {
   return (
     <div className='flex items-center gap-2'>
       {hasActiveSession && activeSession ? (
-        <>
-          <div className='bg-primary text-primary-foreground flex w-[120px] items-center justify-center gap-2 rounded-md px-3 py-1.5'>
-            <IconClock className='h-4 w-4' />
-            <span className='text-sm tabular-nums'>{elapsedTime}</span>
-          </div>
-          <Popover
-            open={checkOutPopoverOpen}
-            onOpenChange={setCheckOutPopoverOpen}
-          >
-            <PopoverTrigger asChild>
-              <Button
-                className='bg-secondary text-secondary-foreground hover:bg-secondary/90'
-                variant='default'
-                size='sm'
-                disabled={loading}
-              >
-                <IconLogout className='h-4 w-4' />
-                Check Out
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-80' align='start'>
-              <div className='space-y-4'>
-                <div>
-                  <h4 className='mb-1 text-sm font-medium'>Check Out</h4>
-                  <p className='text-muted-foreground text-xs'>
-                    Confirm your location to check out
-                  </p>
-                </div>
-                {locationError && (
-                  <div className='text-destructive text-sm'>
-                    {locationError}
-                  </div>
-                )}
-                <div className='space-y-2'>
-                  <Label htmlFor='checkOutNotes'>Notes (Optional)</Label>
-                  <Textarea
-                    id='checkOutNotes'
-                    placeholder='Add any notes...'
-                    value={checkOutNotes}
-                    onChange={(e) => setCheckOutNotes(e.target.value)}
-                    rows={2}
-                  />
-                </div>
-                <div className='flex justify-end gap-2'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={() => {
-                      setCheckOutPopoverOpen(false);
-                      setCheckOutNotes('');
-                      setLocationError(null);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCheckOut} disabled={loading} size='sm'>
-                    {loading ? 'Checking out...' : 'Check Out'}
-                  </Button>
-                </div>
+        <Popover
+          open={checkOutPopoverOpen}
+          onOpenChange={setCheckOutPopoverOpen}
+        >
+          <PopoverTrigger asChild>
+            <button
+              className='bg-primary text-primary-foreground hover:bg-primary/90 flex w-[120px] cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+              disabled={loading}
+            >
+              <IconClock className='h-4 w-4' />
+              <span className='text-sm tabular-nums'>{elapsedTime}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className='w-80' align='start'>
+            <div className='space-y-4'>
+              <div>
+                <h4 className='mb-1 text-sm font-medium'>Check Out</h4>
+                <p className='text-muted-foreground text-xs'>
+                  Confirm your location to check out
+                </p>
               </div>
-            </PopoverContent>
-          </Popover>
-        </>
+              {locationError && (
+                <div className='text-destructive text-sm'>{locationError}</div>
+              )}
+              <div className='space-y-2'>
+                <Label htmlFor='checkOutNotes'>Notes (Optional)</Label>
+                <Textarea
+                  id='checkOutNotes'
+                  placeholder='Add any notes...'
+                  value={checkOutNotes}
+                  onChange={(e) => setCheckOutNotes(e.target.value)}
+                  rows={2}
+                />
+              </div>
+              <div className='flex justify-end gap-2'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => {
+                    setCheckOutPopoverOpen(false);
+                    setCheckOutNotes('');
+                    setLocationError(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleCheckOut} disabled={loading} size='sm'>
+                  {loading ? 'Checking out...' : 'Check Out'}
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       ) : (
         <>
           <Popover
@@ -426,9 +416,16 @@ export function AttendanceWidget() {
             onOpenChange={setCheckInPopoverOpen}
           >
             <PopoverTrigger asChild>
-              <Button variant='default' size='sm' disabled={loading}>
-                <IconPlayerPlay className='h-4 w-4' />
-                Submit Attendance
+              <Button
+                variant='default'
+                size='sm'
+                disabled={loading}
+                className='px-2 md:px-3'
+              >
+                <IconPlayerPlay className='h-3 w-3 md:h-4 md:w-4' />
+                <span className='hidden text-xs md:inline md:text-sm'>
+                  Submit Attendance
+                </span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className='w-80' align='start'>
@@ -444,6 +441,29 @@ export function AttendanceWidget() {
                     {locationError}
                   </div>
                 )}
+                {/* Office/Site selection - shown on mobile inside popover */}
+                <div className='space-y-2 md:hidden'>
+                  <Label htmlFor='workLocation' className='text-sm'>
+                    Work Location
+                  </Label>
+                  <ToggleGroup
+                    type='single'
+                    value={workLocation}
+                    onValueChange={(value) =>
+                      value && setWorkLocation(value as 'OFFICE' | 'SITE')
+                    }
+                    className='w-full'
+                  >
+                    <ToggleGroupItem value='OFFICE' className='flex-1'>
+                      <IconHome className='h-4 w-4' />
+                      Office
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value='SITE' className='flex-1'>
+                      <IconBuilding className='h-4 w-4' />
+                      Site
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
                 {/* Check if late - show reason field */}
                 {(() => {
                   const now = new Date();
