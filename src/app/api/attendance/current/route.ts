@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@/types/user-role';
+import { getTodayInKathmandu } from '@/lib/kathmandu-time';
 
 export async function GET() {
   try {
@@ -20,8 +21,7 @@ export async function GET() {
     }
 
     const now = new Date();
-    const today = new Date(now);
-    today.setUTCHours(0, 0, 0, 0);
+    const today = getTodayInKathmandu(); // Get today's date in Kathmandu timezone
 
     // Find active session (check-in without check-out) for today
     const activeSession = await prisma.attendanceSession.findFirst({

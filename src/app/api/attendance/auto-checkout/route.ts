@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@/types/user-role';
+import {
+  getKathmanduHours,
+  getKathmanduMinutes,
+  getTodayInKathmandu
+} from '@/lib/kathmandu-time';
 
-// Kathmandu timezone offset: UTC+5:45
-const KATHMANDU_OFFSET_MS = 5.75 * 60 * 60 * 1000;
 const AUTO_CHECKOUT_HOUR = 23; // 11 PM
 const AUTO_CHECKOUT_MINUTE = 59; // 59 minutes
 
-function getKathmanduTime(date: Date): Date {
-  return new Date(date.getTime() + KATHMANDU_OFFSET_MS);
-}
-
 function isAutoCheckoutTime(date: Date): boolean {
-  const kathmanduTime = getKathmanduTime(date);
-  return (
-    kathmanduTime.getHours() === AUTO_CHECKOUT_HOUR &&
-    kathmanduTime.getMinutes() === AUTO_CHECKOUT_MINUTE
-  );
+  const hour = getKathmanduHours(date);
+  const minute = getKathmanduMinutes(date);
+  return hour === AUTO_CHECKOUT_HOUR && minute === AUTO_CHECKOUT_MINUTE;
 }
 
 export async function POST(request: Request) {
@@ -30,8 +27,7 @@ export async function POST(request: Request) {
     }
 
     const now = new Date();
-    const today = new Date(now);
-    today.setUTCHours(0, 0, 0, 0);
+    const today = getTodayInKathmandu(); // Get today's date in Kathmandu timezone
 
     // Find all active sessions (checked in but not checked out) for today
     const activeSessions = await prisma.attendanceSession.findMany({
@@ -175,9 +171,12 @@ export async function POST(request: Request) {
 
 // GET endpoint for manual testing
 export async function GET() {
+  const now = new Date();
   return NextResponse.json({
     message: 'Auto check-out endpoint. Use POST with authorization header.',
-    time: new Date().toISOString(),
-    kathmanduTime: getKathmanduTime(new Date()).toISOString()
+    time: now.toISOString(),
+    kathmanduHour: getKathmanduHours(now),
+    kathmanduMinute: getKathmanduMinutes(now),
+    isAutoCheckoutTime: isAutoCheckoutTime(now)
   });
 }

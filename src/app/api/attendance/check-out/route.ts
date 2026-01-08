@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@/types/user-role';
 import { isWithinCheckoutRadius, calculateDistance } from '@/lib/distance';
+import { getTodayInKathmandu } from '@/lib/kathmandu-time';
 
 export async function POST(request: Request) {
   try {
@@ -32,8 +33,7 @@ export async function POST(request: Request) {
     }
 
     const now = new Date();
-    const today = new Date(now);
-    today.setUTCHours(0, 0, 0, 0);
+    const today = getTodayInKathmandu(); // Get today's date in Kathmandu timezone
 
     // Find the active session for today (most recent check-in without check-out)
     const activeSession = await prisma.attendanceSession.findFirst({

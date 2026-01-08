@@ -15,9 +15,10 @@ import { useRouter } from 'next/navigation';
 import { IconBrightness, IconSettings, IconUser } from '@tabler/icons-react';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function UserNav() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
 
@@ -34,6 +35,11 @@ export function UserNav() {
       setTheme(newMode);
     });
   }, [resolvedTheme, setTheme]);
+
+  // Show skeleton while loading
+  if (status === 'loading') {
+    return <Skeleton className='h-8 w-8 rounded-full' />;
+  }
 
   if (!session?.user) {
     return null;

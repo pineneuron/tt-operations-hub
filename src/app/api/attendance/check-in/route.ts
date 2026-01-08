@@ -2,23 +2,11 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { UserRole } from '@/types/user-role';
-
-// Kathmandu timezone offset: UTC+5:45
-const KATHMANDU_OFFSET_MS = 5.75 * 60 * 60 * 1000;
-const EXPECTED_CHECK_IN_HOUR = 10; // 10 AM
-const EXPECTED_CHECK_OUT_HOUR = 18; // 6 PM
-
-function getKathmanduTime(date: Date): Date {
-  return new Date(date.getTime() + KATHMANDU_OFFSET_MS);
-}
-
-function getExpectedCheckInTime(date: Date): Date {
-  const kathmanduDate = getKathmanduTime(date);
-  const expected = new Date(kathmanduDate);
-  expected.setHours(EXPECTED_CHECK_IN_HOUR, 0, 0, 0);
-  // Convert back to UTC
-  return new Date(expected.getTime() - KATHMANDU_OFFSET_MS);
-}
+import {
+  getExpectedCheckInTime,
+  getTodayInKathmandu,
+  isLateCheckIn
+} from '@/lib/kathmandu-time';
 
 export async function POST(request: Request) {
   try {
@@ -59,11 +47,10 @@ export async function POST(request: Request) {
     }
 
     const now = new Date();
-    const today = new Date(now);
-    today.setUTCHours(0, 0, 0, 0);
+    const today = getTodayInKathmandu(); // Get today's date in Kathmandu timezone
 
     const expectedCheckInTime = getExpectedCheckInTime(now);
-    const isLate = now > expectedCheckInTime;
+    const isLate = isLateCheckIn(now);
     const lateMinutes = isLate
       ? Math.floor(
           (now.getTime() - expectedCheckInTime.getTime()) / (1000 * 60)

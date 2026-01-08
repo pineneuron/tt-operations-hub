@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   IconClock,
   IconHome,
@@ -21,6 +22,7 @@ import {
 import { toast } from 'sonner';
 import { UserRole } from '@/types/user-role';
 import { isWithinCheckoutRadius } from '@/lib/distance';
+import { isLateCheckIn } from '@/lib/kathmandu-time';
 
 interface AttendanceSession {
   id: string;
@@ -139,7 +141,9 @@ export function AttendanceWidget() {
     const checkInTime = new Date(
       attendanceData.activeSession.checkInTime
     ).getTime();
-    const interval = setInterval(() => {
+
+    // Calculate elapsed time immediately
+    const calculateElapsed = () => {
       const now = Date.now();
       const elapsed = now - checkInTime;
       const hours = Math.floor(elapsed / (1000 * 60 * 60));
@@ -148,7 +152,13 @@ export function AttendanceWidget() {
       setElapsedTime(
         `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
       );
-    }, 1000);
+    };
+
+    // Calculate immediately on mount/update
+    calculateElapsed();
+
+    // Then update every second
+    const interval = setInterval(calculateElapsed, 1000);
 
     return () => clearInterval(interval);
   }, [attendanceData?.activeSession]);
@@ -208,14 +218,9 @@ export function AttendanceWidget() {
       const location = await getCurrentLocation();
       setCurrentLocation(location);
 
-      // Check if late (10 AM Kathmandu = 4:15 AM UTC)
-      // Kathmandu is UTC+5:45, so 10:00 AM Kathmandu = 4:15 AM UTC
+      // Check if late (10 AM Kathmandu time)
       const now = new Date();
-      const kathmanduOffset = 5.75 * 60 * 60 * 1000; // 5 hours 45 minutes in milliseconds
-      const kathmanduTime = new Date(now.getTime() + kathmanduOffset);
-      const isLate =
-        kathmanduTime.getHours() > 10 ||
-        (kathmanduTime.getHours() === 10 && kathmanduTime.getMinutes() >= 1);
+      const isLate = isLateCheckIn(now);
 
       if (isLate && !lateReason.trim()) {
         setLocationError('Please provide a reason for being late');
@@ -334,10 +339,12 @@ export function AttendanceWidget() {
       }
 
       toast.success('Checked out successfully');
-      setCheckOutPopoverOpen(false);
       setCheckOutNotes('');
       setLocationError(null);
-      await fetchAttendance();
+      setCheckOutPopoverOpen(false);
+      // Small delay to ensure database update is complete before fetching
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await fetchAttendance(); // Fetch updated attendance data
     } catch (error: any) {
       setLocationError(error.message || 'Failed to get location');
       toast.error(error.message || 'Failed to check out');
@@ -352,6 +359,19 @@ export function AttendanceWidget() {
 
   const hasActiveSession = attendanceData?.hasActiveSession ?? false;
   const activeSession = attendanceData?.activeSession;
+  const isLoading = attendanceData === null;
+
+  // Show skeleton loading while fetching attendance data
+  if (isLoading) {
+    return (
+      <div className='flex items-center gap-2'>
+        <Skeleton className='h-8 w-[140px] rounded-md' />{' '}
+        {/* Submit Attendance button skeleton */}
+        <Skeleton className='hidden h-8 w-[120px] rounded-md md:block' />{' '}
+        {/* Office/Site toggle skeleton */}
+      </div>
+    );
+  }
 
   return (
     <div className='flex items-center gap-2'>
@@ -467,14 +487,7 @@ export function AttendanceWidget() {
                 {/* Check if late - show reason field */}
                 {(() => {
                   const now = new Date();
-                  const kathmanduOffset = 5.75 * 60 * 60 * 1000;
-                  const kathmanduTime = new Date(
-                    now.getTime() + kathmanduOffset
-                  );
-                  const isLate =
-                    kathmanduTime.getHours() > 10 ||
-                    (kathmanduTime.getHours() === 10 &&
-                      kathmanduTime.getMinutes() >= 1);
+                  const isLate = isLateCheckIn(now);
                   return isLate ? (
                     <div className='space-y-2'>
                       <Label htmlFor='lateReason' className='text-sm'>
